@@ -39,11 +39,11 @@ class DatasetGenerator:
         prompts_validation = {}
 
         for word in self.__words:
-            prompts_train[word] = [f"a {word}"] * n_train
+            prompts_train[word] = [word] * n_train
         for word in self.__words:
-            prompts_test[word] = [f"a {word}"] * n_test
+            prompts_test[word] = [word] * n_test
         for word in self.__words:
-            prompts_validation[word] = [f"a {word}"] * n_validation
+            prompts_validation[word] = [word] * n_validation
         
         self.generate_dataset(image_generator, inference_params, prompts_train, prompts_test, prompts_validation)
 
@@ -57,5 +57,5 @@ class DatasetGenerator:
 
 if __name__ == "__main__":
     ig = ImageGenerator()
-    dg = DatasetGenerator("./data", "test", "cupcake", ["cup", "cake"])
-    dg.generate_simple_dataset(ig, None, 3, 1, 1)
+    dg = DatasetGenerator("../data", "pancake_dataset", "pancake", ["pan", "cake"])
+    dg.generate_simple_dataset(ig, None, 20, 5, 5)
