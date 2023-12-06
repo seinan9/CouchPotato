@@ -1,40 +1,61 @@
 import os
 from ImageGenerator import ImageGenerator
 
+# Class that handles the generation of datasets.
 class DatasetGenerator:
 
-    def __init__(self, image_generator: ImageGenerator, data_dir: str, compound: str, components: list[str]):
-        self.__image_generator = image_generator
+    def __init__(self, data_dir: str, dataset_id:str, compound: str, components: list[str]):
         self.__data_dir = data_dir
-        self.__compound = compound
-        self.__components = components
-    
-    def generate_simple_dataset(self, n_train: int, n_test: int, n_validation: int, num_inference_steps: int = 50):
-        self.create_directory_structure()
-        self.generate_data_for_word(self.__comound, n_train, n_test, n_validation)
-        for component in self.__components:
-            self.generate_data_for_word(component, n_train, n_test, n_validation)
+        self.__dataset_id = dataset_id
+        self.__words = [compound] + [component for component in components]
+        self.__create_directory_structure()
 
-    def generate_data_for_word(self, word, n_train, n_test, n_validation, num_inference_steps: int = 50):
-        word = [f"a {word}"] * (n_train + n_test + n_validation)
-        images = self.__image_generator.generate_images(word)
-        for i in range(n_train):
-            images[i].save(f"{self.__data_dir}/datasets/{self.__compound}_datasets/train/{word}/{i}_{word}")
-        for i in range(n_train, n_test):
-            images[i].save(f"{self.__data_dir}/datasets/{self.__compound}_datasets/test/{word}/{i}_{word}")
-        for i in range(n_train, n_validation):
-            images[i].save(f"{self.__data_dir}/datasets/{self.__compound}_datasets/validation/{word}/{i}_{word}")
-    
-    def create_directory_structure(self):
-        os.makedirs(f"{self.__data_dir}/datasets/{self.__compound}_dataset/train")
-        os.makedirs(f"{self.__data_dir}/datasets/{self.__compound}_dataset/test")
-        os.makedirs(f"{self.__data_dir}/datasets/{self.__compound}_dataset/validation")
+    # Generate images and store them in a dataset appropriate structure.
+    def generate_dataset(self, image_generator: ImageGenerator, inference_params: list, prompts_train: dict, prompts_test: dict, prompts_validation: dict):
+        for word in self.__words:
+            
+            # Generate images
+            images = []
+            for prompt in (prompts_train[word] + prompts_test[word] + prompts_validation[word]):
+                images += image_generator.generate_images(prompt)
+            
+            # Store images
+            n_train = len(prompts_train[word])
+            n_test = len(prompts_test[word])
+            n_validation = len(prompts_validation[word])
+            for i in range(n_train):
+                images[i].save(f"{self.__data_dir}/datasets/{self.__dataset_id}/train/{word}/{i}_{word}.png")
+            for i in range(n_train, n_train + n_test):
+                images[i].save(f"{self.__data_dir}/datasets/{self.__dataset_id}/test/{word}/{i}_{word}.png")
+            for i in range(n_train + n_test, n_train + n_test + n_validation):
+                images[i].save(f"{self.__data_dir}/datasets/{self.__dataset_id}/validation/{word}/{i}_{word}.png")
 
-        for i in range(self.components):
-            os.makedirs(f"{self.__data_dir}/datasets/{self.__compound}_dataset/train/{self.__components[i]}")
-            os.makedirs(f"{self.__data_dir}/datasets/{self.__compound}_dataset/test/{self.components[i]}")
-            os.makedirs(f"{self.__data_dir}/datasets/{self.__compound}_dataset/validation/{self.__components[i]}")
+
+    # Generate a simple dataset without specifying prompts.
+    # The propmts are of the form "a word".
+    def generate_simple_dataset(self, image_generator: ImageGenerator, inference_params: list ,n_train: int, n_test: int, n_validation: int):
+        prompts_train = {}
+        prompts_test = {}
+        prompts_validation = {}
+
+        for word in self.__words:
+            prompts_train[word] = [f"a {word}"] * n_train
+        for word in self.__words:
+            prompts_test[word] = [f"a {word}"] * n_test
+        for word in self.__words:
+            prompts_validation[word] = [f"a {word}"] * n_validation
+        
+        self.generate_dataset(image_generator, inference_params, prompts_train, prompts_test, prompts_validation)
+
+    # Create directory structure where images are stored and loaded from.
+    def __create_directory_structure(self):
+        for split in ["train", "test", "validation"]:
+            os.makedirs(f"{self.__data_dir}/datasets/{self.__dataset_id}/{split}")
+            for word in self.__words:
+                os.makedirs(f"{self.__data_dir}/datasets/{self.__dataset_id}/{split}/{word}")
+        print(f"Created directories for dataset with id {self.__dataset_id}.")
 
 if __name__ == "__main__":
-    dg = DatasetGenerator(None, None, "jellyfish", ["jelly", "fish"])
-    dg.generate_simple_dataset(10, 3, 3, 5)
+    ig = ImageGenerator()
+    dg = DatasetGenerator("./data", "test", "cupcake", ["cup", "cake"])
+    dg.generate_simple_dataset(ig, None, 3, 1, 1)
