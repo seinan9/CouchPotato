@@ -4,10 +4,10 @@ from ImageGenerator import ImageGenerator
 # Class that handles the generation of datasets.
 class DatasetGenerator:
 
-    def __init__(self, data_dir: str, dataset_id:str, compound: str, components: list[str]):
+    def __init__(self, data_dir: str, dataset_id:str, compound: str, constituents: list[str]):
         self.__data_dir = data_dir
         self.__dataset_id = dataset_id
-        self.__words = [compound] + [component for component in components]
+        self.__words = [compound] + [constituent for constituent in constituents]
         self.__create_directory_structure()
 
     # Generate images and store them in a dataset appropriate structure.
