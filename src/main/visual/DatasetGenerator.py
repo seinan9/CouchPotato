@@ -1,23 +1,28 @@
 import os
-from ImageGenerator import ImageGenerator
+from main.visual.ImageGenerator import ImageGenerator
+from main.visual.models.SDXLTurbo import SDXLTurbo
 
 # Class that handles the generation of datasets.
 class DatasetGenerator:
 
+    data_dir = None
+    dataset_id = None
+    words = None
+
     def __init__(self, data_dir: str, dataset_id:str, compound: str, constituents: list[str]):
-        self.__data_dir = data_dir
-        self.__dataset_id = dataset_id
-        self.__words = [compound] + [constituent for constituent in constituents]
+        self.data_dir = data_dir
+        self.dataset_id = dataset_id
+        self.words = [compound] + [constituent for constituent in constituents]
         self.__create_directory_structure()
 
     # Generate images and store them in a dataset appropriate structure.
     def generate_dataset(self, image_generator: ImageGenerator, inference_params: list, prompts_train: dict, prompts_test: dict, prompts_validation: dict):
-        for word in self.__words:
+        for word in self.words:
             
             # Generate images
             images = []
             for prompt in (prompts_train[word] + prompts_test[word] + prompts_validation[word]):
-                images += image_generator.generate_images(prompt)
+                images += image_generator.generate_image(prompt)
             
             # Store images
             n_train = len(prompts_train[word])
@@ -56,6 +61,6 @@ class DatasetGenerator:
         print(f"Created directories for dataset with id {self.__dataset_id}.")
 
 if __name__ == "__main__":
-    ig = ImageGenerator()
+    image_generator = SDXLTurbo()
     dg = DatasetGenerator("../data", "pancake_dataset", "pancake", ["pan", "cake"])
-    dg.generate_simple_dataset(ig, None, 20, 5, 5)
+    dg.generate_simple_dataset(image_generator, None, 20, 5, 5)
