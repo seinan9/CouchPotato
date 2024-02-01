@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
 
-class ImageGenerator:
+class ImageGenerator(ABC):
 
     @abstractmethod
-    def __ini__(self):
+    def __init__(self):
         pass
 
     @abstractmethod
