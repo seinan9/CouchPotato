@@ -1,5 +1,5 @@
 import os
-from ImageGenerator import ImageGenerator
+from image_generators.ImageGenerator import ImageGenerator
 
 # Class that handles the generation of datasets.
 

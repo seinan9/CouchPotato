@@ -6,7 +6,7 @@ from torchvision.models import vit_h_14
 import torch
 import numpy as np
 
-from EmbeddingGenerator import EmbeddingGenerator
+from embedding_generators.EmbeddingGenerator import EmbeddingGenerator
 
 
 class ViT(EmbeddingGenerator):
