@@ -1,18 +1,19 @@
 from diffusers import AutoPipelineForText2Image
 import torch
 
-from image_generators.ImageGenerator import ImageGenerator
+from models.word2img_model import Word2ImgModel
 
 
-class SDXLTurbo(ImageGenerator):
+# TODO: add cuda_id argument
+class SDXLTurbo(Word2ImgModel):
 
     # Inference parameters
     num_inference_steps = 3
     guidance_scale = 0
 
-    def __init__(self, cuda_id: int) -> None:
+    def __init__(self) -> None:
         self.__pipeline = AutoPipelineForText2Image.from_pretrained(
-            pretrained_model_or_path='stabilityai/sdxl-turbo', torch_dtype=torch.float16, variant='fp16').to(f'cuda:{cuda_id}')
+            pretrained_model_or_path='stabilityai/sdxl-turbo', torch_dtype=torch.float16, variant='fp16').to(f'cuda:{0}')
 
     def generate_image(self, prompt: list[str]) -> list:
         with torch.no_grad():

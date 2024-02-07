@@ -6,10 +6,10 @@ from torchvision.models import vit_h_14
 import torch
 import numpy as np
 
-from embedding_generators.EmbeddingGenerator import EmbeddingGenerator
+from models.img2vec_model import Img2VecModel
 
-
-class ViT(EmbeddingGenerator):
+# TODO: Update
+class ViT(Img2VecModel):
 
     def __init__(self):
         weights = torchvision.models.ViT_H_14_Weights.DEFAULT

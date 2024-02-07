@@ -8,4 +8,4 @@ class Cosine(DistanceGenerator):
 
     def generate_distance(self, embedding_0: list[float], embedding_1: list[float]) -> float:
         distance = cosine_similarity(embedding_0, embedding_1)
-        return distance
+        return distance.numpy().tolist()
