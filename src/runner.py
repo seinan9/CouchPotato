@@ -3,7 +3,7 @@ import argparse
 from helpers.storage_helper import StorageHelper
 from txt2img import Txt2Img
 
-class Run():
+class Runner():
 
     def __init__(self):
         parser = argparse.ArgumentParser()
@@ -23,5 +23,5 @@ class Run():
         Txt2Img.generate_simple_dataset(self.params["compound"], self.params["constituents"], self.params["num_images"], self.params["txt2img_model_id"], self.params["txt2img_model_params"])
 
 if __name__ == "__main__":
-    run = Run()
-    run.run()
+    runner = Runner()
+    runner.run()
