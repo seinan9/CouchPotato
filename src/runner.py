@@ -2,6 +2,7 @@ import argparse
 
 from helpers.storage_helper import StorageHelper
 from txt2img import Txt2Img
+from img2vec import Img2Vec
 
 class Runner():
 
@@ -21,6 +22,7 @@ class Runner():
 
     def run(self):
         Txt2Img.generate_simple_dataset(self.params["compound"], self.params["constituents"], self.params["num_images"], self.params["txt2img_model_id"], self.params["txt2img_model_params"])
+        Img2Vec.generate_embeddings(self.params["img2vec_model_id"], self.params["img2vec_model_params"])
 
 if __name__ == "__main__":
     runner = Runner()

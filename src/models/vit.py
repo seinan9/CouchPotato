@@ -18,18 +18,10 @@ class ViT(Img2VecModel):
             *list(self.model.heads.children())[:-1])
         self.model = self.model.to("cuda:0")
 
-    def generate_embedding(self, img_path: str):
-        img = self.process_test_image(img_path).to("cuda:0")
-        emb = self.model(img).detach().cpu()
-        return emb
-
-    def process_test_image(self, image_path):
-        img = Image.open(image_path)
+    def generate_embedding(self, img):
         transformations = tr.Compose([tr.ToTensor(),
-                                      tr.Normalize(
-                                          (0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
-                                      tr.Resize((518, 518))])
-        img = transformations(img).float()
-        img = img.unsqueeze_(0)
-
-        return img
+                                tr.Normalize(
+                                    (0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
+                                tr.Resize((518, 518))])
+        img = transformations(img).float().unsqueeze_(0).to('cuda:0')
+        return self.model(img).detach().cpu()

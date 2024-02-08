@@ -1,7 +1,7 @@
 import os
 import json
 from PIL import Image
-
+import torch
 
 class StorageHelper():
 
@@ -36,16 +36,15 @@ class StorageHelper():
     def save_image(image: Image, file_name):
         image.save(f'{StorageHelper.output_dir}/images/{file_name}.png')
 
-    # TODO
     @staticmethod
     def save_vec(vec, file_name):
-        pass
+        torch.save(vec, f'{StorageHelper.output_dir}/vectors/{file_name}.pt')
 
-    # TODO
     @staticmethod
     def load_vec(file_name):
-        pass
+        return torch.load(f'{StorageHelper.output_dir}/vectors/{file_name}.pt')
 
     @staticmethod
-    def list_images():
-        return os.listdir(f'{StorageHelper.output_dir}/images')
+    def list_files(sub_dir):
+        return [file_name.split('.')[0] for file_name in os.listdir(f'{StorageHelper.output_dir}/{sub_dir}')]
+    

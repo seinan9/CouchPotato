@@ -14,7 +14,7 @@ class ModelLoader():
     @staticmethod
     def get_img2vec_model(img2vec_model_id: str) -> Img2VecModel:
         module = importlib.import_module(
-            f'embedding_generators.{img2vec_model_id.lower()}')
+            f'models.{img2vec_model_id.lower()}')
         return getattr(module, img2vec_model_id)()
 
     # @staticmethod
