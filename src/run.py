@@ -1,7 +1,7 @@
 import argparse
 
 from helpers.storage_helper import StorageHelper
-from word2img import Word2Img
+from txt2img import Txt2Img
 
 class Run():
 
@@ -20,7 +20,7 @@ class Run():
         StorageHelper.save_params(self.params)
 
     def run(self):
-        Word2Img.generate_simple_dataset(self.params["compound"], self.params["constituents"], self.params["num_images"], self.params["word2img_model_id"], self.params["word2img_model_params"])
+        Txt2Img.generate_simple_dataset(self.params["compound"], self.params["constituents"], self.params["num_images"], self.params["txt2img_model_id"], self.params["txt2img_model_params"])
 
 if __name__ == "__main__":
     run = Run()

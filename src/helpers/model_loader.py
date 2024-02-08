@@ -1,6 +1,6 @@
 import importlib
 
-from models.word2img_model import Word2ImgModel
+from models.txt2img_model import Word2ImgModel
 from models.img2vec_model import Img2VecModel
 
 

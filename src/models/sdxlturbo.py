@@ -1,11 +1,11 @@
 from diffusers import AutoPipelineForText2Image
 import torch
 
-from models.word2img_model import Word2ImgModel
+from models.txt2img_model import Txt2ImgModel
 
 
 # TODO: add cuda_id argument
-class SDXLTurbo(Word2ImgModel):
+class SDXLTurbo(Txt2ImgModel):
 
     # Inference parameters
     num_inference_steps = 3

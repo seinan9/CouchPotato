@@ -6,9 +6,9 @@
         "cake"
     ],
     "num_images": 1,
-    "word2img_method": "generate_simple_dataset",
-    "word2img_model_id": "SDXLTurbo",
-    "word2img_model_params": [],
+    "txt2img_method": "generate_simple_dataset",
+    "txt2img_model_id": "SDXLTurbo",
+    "txt2img_model_params": [],
     "img2vec_method": "TODO",
     "img2vec_model_id": "ViT",
     "img2vec_model_params": [],
