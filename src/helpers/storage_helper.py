@@ -1,5 +1,6 @@
 import os
 import json
+import csv
 from PIL import Image
 import torch
 
@@ -47,4 +48,13 @@ class StorageHelper():
     @staticmethod
     def list_files(sub_dir):
         return [file_name.split('.')[0] for file_name in os.listdir(f'{StorageHelper.output_dir}/{sub_dir}')]
+    
+    # needs compound, constituents and id
+    # ideally, everything is infered from results, but keys need to be in correct order
+    @staticmethod
+    def save_tsv(results, file_name):
+        a = {
+            "compound": []
+        }
+        pass
     
