@@ -1,13 +1,14 @@
 from natsort import natsorted
 from helpers.storage_helper import StorageHelper
+import torch
+
 
 class Vec2Dist():
-    
-    @staticmethod
-    def calculate_distances(compound, constituents):
-        file_names_separated = {f'{word}':[] for word in [compound] + constituents}
 
-        print(file_names_separated)
+    @staticmethod
+    def do(compound, constituents):
+        file_names_separated = {f'{word}': []
+                                for word in [compound] + constituents}
 
         file_names = StorageHelper.list_files('vectors')
         for file_name in file_names:
@@ -18,34 +19,20 @@ class Vec2Dist():
 
         for word in file_names_separated.keys():
             file_names_separated[word] = natsorted(file_names_separated[word])
-            # print(f'Key: {word} \n Value: {vectors[word]}')
 
-        vectors = {f'{word}':[StorageHelper.load_vec(file_name) for file_name in file_names_separated[word]] for word in [compound] + constituents}
+        vectors = {f'{word}': torch.stack([StorageHelper.load_vec(
+            file_name) for file_name in file_names_separated[word]]) for word in [compound] + constituents}
 
-        # distances  = aggregator(comp_vecs, consts_vecs)
-        # StorageHelper.save_distances(distances, file_name)
+        return Vec2Dist.aggregate_mean(compound, constituents, vectors)
 
+    @staticmethod
+    def aggregate_mean(compound, constituents, vectors):
+        mean_vectors = {f'{word}': torch.mean(vectors[word], dim=0) for word in [
+            compound] + constituents}
 
-    def agg_sep(compound, constituents, vectors):
-        means = {}
-        results = [cos(vectors[compound][i], constituents[constituent][i] for i in range len(vectors[compound]))]
-        for vec in vectors[compound]:
+        return {f'{constituent}': Vec2Dist.cos(
+            mean_vectors[compound], mean_vectors[constituent]) for constituent in constituents}
 
-        default/cupcake_0
-        write as cupcake_sep.tsv
-
-    # load the vectors in the parent method
-    # reading from disk each time is probably slower than accessing it from memory
-    def agg_mean_pre_measure(compound, constituents, file_names_separated):
-        n = len(file_names_separated[compound])
-
-        means = {f'{word}': sum()}
-
-        vecs_comp = [StorageHelper.load_vec(file_names_separated[compound][i]) for i in range(n)]
-
-        mean_comp = sum(file_names_separated[compound]) / n
-        means_constituents = [sum(file_names_separated[constituent]) / n for constituent in constituents]
-        results = [[cos(mean_comp, means_constituents[i]) for i in range(n)]]
-        return results
-    
-    def cos(vec_0)
+    @staticmethod
+    def cos(vec_0, vec_1):
+        return torch.cosine_similarity(vec_0, vec_1, dim=0).numpy().tolist()

@@ -3,11 +3,14 @@ import json
 import csv
 from PIL import Image
 import torch
+from natsort import natsorted
+
 
 class StorageHelper():
 
     # static variable that is set when create_data_dir() is called
     output_dir = None
+    words = None
 
     @staticmethod
     def set_output_dir(output_dir):
@@ -44,7 +47,7 @@ class StorageHelper():
     @staticmethod
     def load_vec(file_name):
         return torch.load(f'{StorageHelper.output_dir}/vectors/{file_name}.pt')
-
+    
     @staticmethod
     def list_files(sub_dir):
         return [file_name.split('.')[0] for file_name in os.listdir(f'{StorageHelper.output_dir}/{sub_dir}')]

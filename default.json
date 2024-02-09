@@ -5,12 +5,13 @@
         "cup",
         "cake"
     ],
-    "num_images": 1,
+    "num_images": 3,
     "txt2img_method": "generate_simple_dataset",
     "txt2img_model_id": "SDXLTurbo",
     "txt2img_model_params": [],
     "img2vec_method": "TODO",
     "img2vec_model_id": "ViT",
     "img2vec_model_params": [],
-    "vec2dist_method": "TODO"
+    "vec2dist_measure": "Cosine",
+    "vec2dist_combination_method": "APD"
 }
