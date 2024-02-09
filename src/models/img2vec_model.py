@@ -1,7 +1,11 @@
-from abc import ABC, abstractmethod
+from abc import ABC
+from abc import abstractmethod
+
+from PIL.Image import Image
+from torch import Tensor
 
 class Img2VecModel(ABC):
 
     @abstractmethod
-    def generate_embedding(self, img_file):
+    def create_vector(self, image: Image) -> Tensor:
         pass

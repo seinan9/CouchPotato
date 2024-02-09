@@ -1,0 +1,10 @@
+{
+    "output_dir": ".data/default",
+    "words": ["pancake", "pan", "cake"],
+    "txt2img_method": "create_with_model",
+    "txt2img_params": [3, "SDXLTurbo", 0],
+    "img2vec_method": "create_with_model",
+    "img2vec_params": ["ViT", 0],
+    "vec2dist_method": "placeholder",
+    "vec2dist_params": ["placeholder"]
+}

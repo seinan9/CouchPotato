@@ -1,24 +1,18 @@
 import importlib
 
-from models.txt2img_model import Txt2ImgModel
 from models.img2vec_model import Img2VecModel
+from models.txt2img_model import Txt2ImgModel
 
 
 class ModelLoader():
 
     @staticmethod
-    def get_txt2img_model(txt2img_model_id: str) -> Txt2ImgModel:
-        module = importlib.import_module(f'models.{txt2img_model_id.lower()}')
-        return getattr(module, txt2img_model_id)()
+    def get_txt2img_model(model_id: str, cuda_id: int) -> Txt2ImgModel:
+        module = importlib.import_module(f'models.{model_id.lower()}')
+        return getattr(module, model_id)(cuda_id)
 
     @staticmethod
-    def get_img2vec_model(img2vec_model_id: str) -> Img2VecModel:
+    def get_img2vec_model(model_id: str, cuda_id) -> Img2VecModel:
         module = importlib.import_module(
-            f'models.{img2vec_model_id.lower()}')
-        return getattr(module, img2vec_model_id)()
-
-    # @staticmethod
-    # def get_distance_generator(id: str) -> DistanceGenerator:
-    #     module = importlib.import_module(f'distance_generators.{id}')
-    #     distance_generator = getattr(module, id)()
-    #     return distance_generator
+            f'models.{model_id.lower()}')
+        return getattr(module, model_id)(cuda_id)

@@ -5,10 +5,10 @@ from helpers.storage_helper import StorageHelper
 class Img2Vec():
 
     @staticmethod
-    def generate_embeddings(img2vec_model_id, img2vec_model_params):
-        img2vec_model = ModelLoader.get_img2vec_model(img2vec_model_id)
-        file_names = StorageHelper.list_files('images')
+    def create_with_model(model_id: str, cuda_id: int) -> None:
+        model = ModelLoader.get_img2vec_model(model_id, cuda_id)
+        file_names = StorageHelper.list_output_files('images')
         for file_name in file_names:
-            img = StorageHelper.load_image(file_name)
-            vec = img2vec_model.generate_embedding(img)
-            StorageHelper.save_vec(vec, file_name)
+            image = StorageHelper.load_image(file_name)
+            vector = model.create_vector(image)
+            StorageHelper.save_vector(vector, file_name)

@@ -1,12 +1,14 @@
-from natsort import natsorted
-from helpers.storage_helper import StorageHelper
 import torch
+
+from helpers.storage_helper import StorageHelper
 
 
 class Vec2Dist():
 
     @staticmethod
-    def do(compound, constituents):
+    def do(params):
+        compound = params[0]
+        constituents = params[1]
         file_names_separated = {f'{word}': []
                                 for word in [compound] + constituents}
 
@@ -17,13 +19,11 @@ class Vec2Dist():
                     file_names_separated[word].append(file_name)
                     break
 
-        for word in file_names_separated.keys():
-            file_names_separated[word] = natsorted(file_names_separated[word])
-
         vectors = {f'{word}': torch.stack([StorageHelper.load_vec(
             file_name) for file_name in file_names_separated[word]]) for word in [compound] + constituents}
 
-        return Vec2Dist.aggregate_mean(compound, constituents, vectors)
+        results = Vec2Dist.aggregate_mean(compound, constituents, vectors)
+        print(results)
 
     @staticmethod
     def aggregate_mean(compound, constituents, vectors):
