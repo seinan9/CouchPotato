@@ -1,11 +1,11 @@
 from abc import ABC
 from abc import abstractmethod
 
-from PIL.Image import Image
-from torch import Tensor
+import torch
+from PIL import Image
 
 class Img2VecModel(ABC):
 
     @abstractmethod
-    def create_vector(self, image: Image) -> Tensor:
+    def create_vector(self, image: Image.Image) -> torch.Tensor:
         pass

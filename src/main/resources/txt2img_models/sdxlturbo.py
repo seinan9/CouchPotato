@@ -1,8 +1,8 @@
 import torch
-from diffusers import AutoPipelineForText2Image
+from diffusers.pipelines.auto_pipeline import AutoPipelineForText2Image
 from PIL.Image import Image
 
-from models.txt2img_model import Txt2ImgModel
+from resources.txt2img_models.txt2img_model import Txt2ImgModel
 
 
 class SDXLTurbo(Txt2ImgModel):

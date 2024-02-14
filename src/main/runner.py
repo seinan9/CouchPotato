@@ -29,8 +29,8 @@ class Runner():
             *self.parameters['txt2img_params'])
         getattr(Img2Vec, self.parameters['img2vec_method'])(
             *self.parameters['img2vec_params'])
-        # getattr(Vec2Dist, self.parameters['vec2dist_method'])(
-        #     *self.parameters['vec2dist_params'])
+        getattr(Vec2Dist, self.parameters['vec2dist_method'])(
+            *self.parameters['vec2dist_params'])
 
 
 if __name__ == "__main__":

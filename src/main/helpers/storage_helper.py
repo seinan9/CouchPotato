@@ -1,17 +1,16 @@
+import csv
 import json
 import os
 
 import torch
 from natsort import natsorted
-from PIL.Image import Image
-from PIL import Image as image
-
+from PIL import Image
 
 class StorageHelper():
 
     # static variables that are set by the runner
-    output_directory: str = None
-    words: list[str] = None
+    output_directory: str = ''
+    words: list[str] = []
 
     @staticmethod
     def set_output_directory(output_directory: str) -> None:
@@ -38,11 +37,11 @@ class StorageHelper():
             json.dump(parameters, f, indent=4)
 
     @staticmethod
-    def load_image(file_name: str) -> Image:
-        return image.open(f'{StorageHelper.output_directory}/images/{file_name}.png')
+    def load_image(file_name: str) -> Image.Image:
+        return Image.open(f'{StorageHelper.output_directory}/images/{file_name}.png')
 
     @staticmethod
-    def save_image(image: Image, file_name: str) -> None:
+    def save_image(image: Image.Image, file_name: str) -> None:
         image.save(f'{StorageHelper.output_directory}/images/{file_name}.png')
 
     @staticmethod
@@ -53,6 +52,29 @@ class StorageHelper():
     @staticmethod
     def load_vector(file_name: str) -> torch.Tensor:
         return torch.load(f'{StorageHelper.output_directory}/vectors/{file_name}.pt')
+
+    @staticmethod
+    def load_all_vectors() -> dict[str, torch.Tensor]:
+        file_names_separated = {f'{word}': [] for word in StorageHelper.words}
+        file_names = StorageHelper.list_output_files('vectors')
+
+        for file_name in file_names:
+            for word in file_names_separated.keys():
+
+                # This works solely because the file_names corresponding to the compound are processed first, since words[0] corresponds to the compound.
+                # TODO: Find a more robust way, that is not dependent on the ordering of words[]
+                if word in file_name:
+                    file_names_separated[word].append(file_name)
+                    break
+
+        return {f'{word}': torch.stack([StorageHelper.load_vector(file_name) for file_name in file_names_separated[word]]) for word in StorageHelper.words}
+
+    @staticmethod
+    def save_distances(distances, file_name):
+        with open(f'{StorageHelper.output_directory}/distances/{file_name}.tsv', 'w', newline='') as f:
+            csvwriter = csv.DictWriter(f, fieldnames=distances.keys())
+            csvwriter.writeheader()
+            csvwriter.writerow(distances)
 
     @staticmethod
     def list_output_files(sub_directory: str) -> list[str]:
