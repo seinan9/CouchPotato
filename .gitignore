@@ -3,4 +3,5 @@ __pycache__/
 .data/
 .hypothesis
 .venv/
+.vscode/
 notes.md
