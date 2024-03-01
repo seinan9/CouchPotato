@@ -1,12 +1,15 @@
 import csv
 import json
 import os
+import logging
 
 import torch
 from natsort import natsorted
 from PIL import Image
 
 class StorageHelper():
+
+    logger = logging.getLogger(__name__)
 
     # static variables that are set by the runner
     output_directory: str = ''
@@ -25,16 +28,22 @@ class StorageHelper():
         os.makedirs(f'{StorageHelper.output_directory}/images')
         os.makedirs(f'{StorageHelper.output_directory}/vectors')
         os.makedirs(f'{StorageHelper.output_directory}/distances')
+        StorageHelper.logger.info('Created output directory')
 
     @staticmethod
     def load_parameters(file: str) -> dict:
         with open(file) as f:
-            return json.load(f)
+            parameters = json.load(f)
+
+        StorageHelper.logger.info('Loaded parameters')
+        return parameters
 
     @staticmethod
     def save_parameters(parameters: dict) -> None:
         with open(f'{StorageHelper.output_directory}/parameters.json', 'w', encoding='utf-8') as f:
             json.dump(parameters, f, indent=4)
+        
+        StorageHelper.logger.info('Saved parameters in output directory')
 
     @staticmethod
     def load_image(file_name: str) -> Image.Image:

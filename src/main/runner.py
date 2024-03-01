@@ -1,12 +1,18 @@
 import argparse
+import logging
 
 from helpers.storage_helper import StorageHelper
+from helpers.validator import Validator
 from img2vec import Img2Vec
 from txt2img import Txt2Img
 from vec2dist import Vec2Dist
 
 
 class Runner():
+
+    logging.basicConfig(
+        format='%(asctime)s - %(levelname)s - %(message)s', level=logging.DEBUG)
+    logger = logging.getLogger(__name__)
 
     def __init__(self) -> None:
         parser = argparse.ArgumentParser()
@@ -16,23 +22,28 @@ class Runner():
         try:
             args = parser.parse_args()
         except argparse.ArgumentError as e:
-            print(e)
+            self.logger.error(e)
 
         self.parameters = StorageHelper.load_parameters(args.file)
-        StorageHelper.set_output_directory(self.parameters['output_dir'])
-        StorageHelper.set_words(self.parameters['words'])
+        if not Validator.validate(self.parameters):
+            self.logger.error('Shutdown due to wrong parameters')
+            exit()
+
+        StorageHelper.set_output_directory(
+            self.parameters['general']['output_dir'])
+        StorageHelper.set_words(self.parameters['general']['words'])
         StorageHelper.create_output_directory()
         StorageHelper.save_parameters(self.parameters)
 
     def run(self) -> None:
-        getattr(Txt2Img, self.parameters['txt2img_method'])(
-            *self.parameters['txt2img_params'])
-        getattr(Img2Vec, self.parameters['img2vec_method'])(
-            *self.parameters['img2vec_params'])
-        getattr(Vec2Dist, self.parameters['vec2dist_method'])(
-            *self.parameters['vec2dist_params'])
+        getattr(Txt2Img, self.parameters['visual']['txt2img_method'])(
+            *self.parameters['visual']['txt2img_params'])
+        getattr(Img2Vec, self.parameters['visual']['img2vec_method'])(
+            *self.parameters['visual']['img2vec_params'])
+        getattr(Vec2Dist, self.parameters['visual']['vec2dist_method'])(
+            *self.parameters['visual']['vec2dist_params'])
 
 
 if __name__ == "__main__":
     runner = Runner()
-    runner.run()
+    # runner.run()
