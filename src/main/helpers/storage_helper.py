@@ -7,13 +7,10 @@ import torch
 from natsort import natsorted
 from PIL import Image
 
+
 class StorageHelper():
 
     logger = logging.getLogger(__name__)
-
-    # static variables that are set by the runner
-    output_directory: str = ''
-    words: list[str] = []
 
     @staticmethod
     def set_output_directory(output_directory: str) -> None:
@@ -24,17 +21,13 @@ class StorageHelper():
         StorageHelper.words = words
 
     @staticmethod
-    def create_output_directory() -> None:
-        os.makedirs(f'{StorageHelper.output_directory}/images')
-        os.makedirs(f'{StorageHelper.output_directory}/vectors')
-        os.makedirs(f'{StorageHelper.output_directory}/distances')
-        StorageHelper.logger.info('Created output directory')
+    def set_approach(approach: str) -> None:
+        StorageHelper.approach = approach
 
     @staticmethod
     def load_parameters(file: str) -> dict:
         with open(file) as f:
             parameters = json.load(f)
-
         StorageHelper.logger.info('Loaded parameters')
         return parameters
 
@@ -42,25 +35,37 @@ class StorageHelper():
     def save_parameters(parameters: dict) -> None:
         with open(f'{StorageHelper.output_directory}/parameters.json', 'w', encoding='utf-8') as f:
             json.dump(parameters, f, indent=4)
-        
+
         StorageHelper.logger.info('Saved parameters in output directory')
 
     @staticmethod
+    def create_output_directory():
+        os.makedirs(f'{StorageHelper.output_directory}/visual/images')
+        os.makedirs(f'{StorageHelper.output_directory}/visual/vectors')
+        os.makedirs(f'{StorageHelper.output_directory}/visual/distances')
+        os.makedirs(f'{StorageHelper.output_directory}/textual/vectors')
+        os.makedirs(f'{StorageHelper.output_directory}/textual/distances')
+        os.makedirs(f'{StorageHelper.output_directory}/combined/vectors')
+        os.makedirs(f'{StorageHelper.output_directory}/combined/distances')
+        StorageHelper.logger.info(f'Created output directory')
+
+    @staticmethod
     def load_image(file_name: str) -> Image.Image:
-        return Image.open(f'{StorageHelper.output_directory}/images/{file_name}.png')
+        return Image.open(f'{StorageHelper.output_directory}/{StorageHelper.approach}/images/{file_name}.png')
 
     @staticmethod
     def save_image(image: Image.Image, file_name: str) -> None:
-        image.save(f'{StorageHelper.output_directory}/images/{file_name}.png')
+        image.save(
+            f'{StorageHelper.output_directory}/{StorageHelper.approach}/images/{file_name}.png')
 
     @staticmethod
     def save_vector(vector: torch.Tensor, file_name: str) -> None:
         torch.save(
-            vector, f'{StorageHelper.output_directory}/vectors/{file_name}.pt')
+            vector, f'{StorageHelper.output_directory}/{StorageHelper.approach}/vectors/{file_name}.pt')
 
     @staticmethod
     def load_vector(file_name: str) -> torch.Tensor:
-        return torch.load(f'{StorageHelper.output_directory}/vectors/{file_name}.pt')
+        return torch.load(f'{StorageHelper.output_directory}/{StorageHelper.approach}/vectors/{file_name}.pt')
 
     @staticmethod
     def load_all_vectors() -> dict[str, torch.Tensor]:
@@ -80,11 +85,11 @@ class StorageHelper():
 
     @staticmethod
     def save_distances(distances, file_name):
-        with open(f'{StorageHelper.output_directory}/distances/{file_name}.tsv', 'w', newline='') as f:
+        with open(f'{StorageHelper.output_directory}/{StorageHelper.approach}/distances/{file_name}.tsv', 'w', newline='') as f:
             csvwriter = csv.DictWriter(f, fieldnames=distances.keys())
             csvwriter.writeheader()
             csvwriter.writerow(distances)
 
     @staticmethod
     def list_output_files(sub_directory: str) -> list[str]:
-        return natsorted([file_name.split('.')[0] for file_name in os.listdir(f'{StorageHelper.output_directory}/{sub_directory}')])
+        return natsorted([file_name.split('.')[0] for file_name in os.listdir(f'{StorageHelper.output_directory}/{StorageHelper.approach}/{sub_directory}')])

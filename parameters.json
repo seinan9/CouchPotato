@@ -1,10 +1,31 @@
 {
-    "output_dir": ".data/default",
-    "words": ["cupcake", "cup", "cake"],
-    "txt2img_method": "create_with_model",
-    "txt2img_params": [3, "SDXLTurbo", 0],
-    "img2vec_method": "create_with_model",
-    "img2vec_params": ["ViT", 0],
-    "vec2dist_method": "aggregate_with_mean",
-    "vec2dist_params": ["Cosine"]
+    "general": {
+        "output_dir": ".data/cupcake",
+        "words": ["cupcake", "cup", "cake"],
+        "seed": 9,
+        "cuda_id": 0
+    },
+    "visual": {
+        "run": true,
+        "txt2img_method": "create_with_model",
+        "txt2img_parameters": [3, "SDXLTurbo", 1],
+        "img2vec_method": "create_with_model",
+        "img2vec_parameters": ["ViT", 1],
+        "vec2dist_method": "aggregate_with_mean",
+        "vec2dist_parameters": ["Cosine"]
+    },
+    "textual": {
+        "run": true,
+        "txt2vec_method": "create_with_model",
+        "txt2vec_parameters": ["FastText"],
+        "vec2dist_method": "aggregate_with_mean",
+        "vec2dist_parameters": ["Cosine"]
+    },
+    "combined": {
+        "run": true,
+        "vec2vec_method": "concat",
+        "vec2vec_parameters": [],
+        "vec2dist_method": "aggregate_with_mean",
+        "vec2dist_parameters": ["Cosine"]
+    }
 }
