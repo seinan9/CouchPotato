@@ -1,10 +1,9 @@
-output_dir: ./data/new
+output_dir: .data/new
 
 global_parameters:
-  targets:
-    cupcake: [cup, cake]
+  targets: targets.yaml
   seed: 0
-  cuda_id: 0
+  cuda_id: 1
 
 workflows:
   - name: visual
@@ -13,8 +12,12 @@ workflows:
         parameters:
           num_images: 3
           model_id: SdxlTurbo
-          steps: 1
-          cfg: 1
+          steps: 3
+          cfg: 0
       - name: ImageFeatureExtractor
         parameters:
           model_id: VisionTransformer
+      - name: VectorCombiner
+        parameters:
+          method: mean
+          dim: 0

@@ -1,8 +1,17 @@
-from runner import Runner
-from helpers.storage_helper import StorageHelper
+import logging
+
+from engine import Engine
+from argparser import ArgParser
+from utils import Utils
 
 if __name__ == "__main__":
-    config_file = "workflow_config.yaml"
-    workflow_config = StorageHelper.load_yaml(config_file)
-    runner = Runner(workflow_config)
-    runner.run()
+
+    logging.basicConfig(
+        format='%(asctime)s - %(levelname)s - %(message)s',
+        level=logging.INFO)
+
+    argparser = ArgParser()
+    args = argparser.parse_args()
+    workflow_config = Utils.load_config(args.file)
+    engine = Engine(workflow_config)
+    engine.run()

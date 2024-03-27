@@ -1,9 +1,10 @@
-import yaml
 import os
 import torch
+import yaml
 
 from natsort import natsorted
 from PIL import Image
+
 
 class StorageHelper():
 
@@ -12,20 +13,16 @@ class StorageHelper():
         os.makedirs(directory_path)
 
     @staticmethod
+    def load_targets(targets_file: str) -> dict:
+        with open(targets_file, 'r') as f:
+            targets = yaml.safe_load(f)
+        return targets
+
+    @staticmethod
     def list_files(directory_path: str) -> list[str]:
-        file_names = natsorted([file_name.split('.')[0] for file_name in os.listdir(directory_path)])
+        file_names = natsorted([file_name.split('.')[0]
+                               for file_name in os.listdir(directory_path)])
         return file_names
-
-    @staticmethod
-    def load_yaml(file_path: str) -> dict:
-        with open(file_path, 'r') as f:
-            data = yaml.safe_load(f)
-        return data
-
-    @staticmethod
-    def save_yaml(data: dict, file_path: str) -> None:
-        with open(file_path, 'w') as f:
-            yaml.safe_dump(data, f, default_flow_style=False)
 
     @staticmethod
     def load_image(file_path: str) -> Image.Image:
