@@ -14,4 +14,4 @@ if __name__ == "__main__":
     args = argparser.parse_args()
     workflow_config = Utils.load_config(args.file)
     engine = Engine(workflow_config)
-    engine.run()
+    engine.start()

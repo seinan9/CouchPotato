@@ -1,3 +1,4 @@
+import csv
 import os
 import torch
 import yaml
@@ -9,20 +10,17 @@ from PIL import Image
 class StorageHelper():
 
     @staticmethod
-    def create_dir(directory_path: str) -> None:
-        os.makedirs(directory_path)
-
-    @staticmethod
-    def load_targets(targets_file: str) -> dict:
-        with open(targets_file, 'r') as f:
+    def load_targets(file_path: str) -> dict:
+        with open(file_path, 'r') as f:
             targets = yaml.safe_load(f)
         return targets
 
     @staticmethod
-    def list_files(directory_path: str) -> list[str]:
-        file_names = natsorted([file_name.split('.')[0]
-                               for file_name in os.listdir(directory_path)])
-        return file_names
+    def list_files(directory_path: str, include_extensions: bool) -> list[str]:
+        files = natsorted(os.listdir(directory_path))
+        if not include_extensions:
+            files = [file.split('.')[0] for file in files]
+        return files
 
     @staticmethod
     def load_image(file_path: str) -> Image.Image:
@@ -41,3 +39,10 @@ class StorageHelper():
     @staticmethod
     def save_vector(vector: torch.Tensor, file_path: str) -> None:
         torch.save(vector, file_path)
+
+    @staticmethod
+    def save_csv(header, values, file_path):
+        with open(file_path, 'w') as f:
+            csvwriter = csv.DictWriter(f, fieldnames=header, delimiter='\t')
+            csvwriter.writeheader()
+            csvwriter.writerows(values)

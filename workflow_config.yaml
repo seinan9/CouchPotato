@@ -6,6 +6,16 @@ global_parameters:
   cuda_id: 1
 
 workflows:
+  - name: textual
+    nodes:
+      - name: TextFeatureExtractor
+        parameters:
+          model_id: FastText
+      - name: SimilarityMeasurer
+        parameters:
+          measure: cosine
+          dim: 0
+
   - name: visual
     nodes:
       - name: SimpleImageGenerator
@@ -20,4 +30,8 @@ workflows:
       - name: VectorCombiner
         parameters:
           method: mean
+          dim: 0
+      - name: SimilarityMeasurer
+        parameters:
+          measure: cosine
           dim: 0

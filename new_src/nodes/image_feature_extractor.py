@@ -1,3 +1,4 @@
+import sys
 import torch
 import torchvision
 
@@ -7,6 +8,7 @@ from PIL.Image import Image
 
 from node import Node
 from helpers.storage_helper import StorageHelper
+from utils import Utils
 
 
 class ImageFeatureExtractor(Node):
@@ -27,16 +29,27 @@ class ImageFeatureExtractor(Node):
         self.model: ImageToVectorModel = globals()[model_id](cuda_id)
 
     def run(self) -> None:
+        progress = 0
+        num_targets = len(self.targets)
         for compound in self.targets.keys():
-            StorageHelper.create_dir(f'{self.output_dir}/{compound}')
-            file_names = StorageHelper.list_files(
-                f'{self.input_dir}/{compound}')
+            progress += 1
+            sys.stdout.write(
+                f'Processing target {progress} out of {num_targets}\r')
+            sys.stdout.flush()
+            compound_input_dir = Utils.join_paths(self.input_dir, compound)
+            compound_output_dir = Utils.join_paths(self.output_dir, compound)
+            Utils.create_dir(compound_output_dir)
+            file_names = StorageHelper.list_files(compound_input_dir, False)
+
             for file_name in file_names:
-                image = StorageHelper.load_image(
-                    f'{self.input_dir}/{compound}/{file_name}.png')
+                file_input_path = Utils.join_paths(
+                    compound_input_dir, f'{file_name}.png')
+                file_output_path = Utils.join_paths(
+                    compound_output_dir, f'{file_name}.pt')
+
+                image = StorageHelper.load_image(file_input_path)
                 vector = self.model.extract_vector(image)
-                StorageHelper.save_vector(
-                    vector, f'{self.output_dir}/{compound}/{file_name}.pt')
+                StorageHelper.save_vector(vector, file_output_path)
 
 
 class ImageToVectorModel(ABC):

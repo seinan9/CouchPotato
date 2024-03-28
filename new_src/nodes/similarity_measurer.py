@@ -1,14 +1,16 @@
-import os
 import torch
 
 from node import Node
 from helpers.storage_helper import StorageHelper
+from utils import Utils
+
 
 class SimilarityMeasurer(Node):
 
     PARAMETERS = {
         'input_dir': str,
         'output_dir': str,
+        'targets': str,
         'measure': str,
         'dim': int
     }
@@ -21,27 +23,34 @@ class SimilarityMeasurer(Node):
         self.measure = getattr(self, measure)
         self.dim = dim
 
-
     # TODO: use list_files and regex instead of assuming target_0.pt
+
     def run(self):
         for compound, constituents in self.targets.items():
-            compound_input_dir = os.path.join(self.input_dir, compound)
-            compound_input_file = os.path.join(compound_input_dir, f'{compound}
-            _0.pt')
+            compound_input_dir = Utils.join_paths(self.input_dir, compound)
+            compound_input_file = Utils.join_paths(
+                compound_input_dir, f'{compound}_0.pt')
             compound_vector = StorageHelper.load_vector(compound_input_file)
-
             similarities = {}
+
             for constituent in constituents:
-                constituent_input_file = os.path.join(compound_input_dir, f'
-                {constituent}_0.pt')
-                constituent_vector = StorageHelper.load_vector(constituent_input_file)
-                similarities[constituent] = self.measure(compound_vector, constituent_vector)
+                constituent_input_file = Utils.join_paths(
+                    compound_input_dir, f'{constituent}_0.pt')
+                constituent_vector = StorageHelper.load_vector(
+                    constituent_input_file)
+                similarities[constituent] = round(self.measure(
+                    compound_vector, constituent_vector, self.dim), 3)
 
-            compound_output_dir = os.path.join(self.output_dir, compound)
-            compound_output_file = os.path.join(compound_output_dir, 'similarities.tsv')
+            compound_output_dir = Utils.join_paths(self.output_dir, compound)
+            compound_output_file = Utils.join_paths(
+                compound_output_dir, 'similarities.csv')
+            Utils.create_dir(compound_output_dir)
 
-            # TODO: implement function to store results in csv or tsv
-            StorageHelper.save_similarities(data, compound_output_file)
+            csv_header = ['compound', 'sim_const_0', 'sim_const_1']
+            csv_values = [{'compound': compound, 'sim_const_0': similarities[constituents[0]],
+                           'sim_const_1': similarities[constituents[1]]}]
+            StorageHelper.save_csv(
+                csv_header, csv_values, compound_output_file)
 
     def cosine(self, vector0: torch.Tensor, vector1: torch.Tensor, dim: int) -> float:
         return torch.cosine_similarity(vector0, vector1, dim).item()

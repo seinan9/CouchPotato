@@ -13,9 +13,17 @@ class Utils():
         os.makedirs(directory_path)
 
     @staticmethod
-    def load_config(config_file: str) -> dict:
+    def is_extension(directory_path: str) -> bool:
+        return os.path.exists(directory_path)
+
+    @staticmethod
+    def join_paths(*paths: str) -> str:
+        return os.path.join(*paths)
+
+    @staticmethod
+    def load_config(file_path: str) -> dict:
         Utils.logger.info('Loading workflow')
-        with open(config_file, 'r') as f:
+        with open(file_path, 'r') as f:
             data = yaml.safe_load(f)
         return data
 
@@ -31,16 +39,40 @@ class Utils():
         return module_name
 
     @staticmethod
+    def convert_to_class_name(module_name: str) -> str:
+        class_name = module_name.title().replace('_', '')
+        return class_name
+
+    @staticmethod
     def combine_parameters(global_parameters: dict, node_parameters: dict) -> dict:
         # If either dictionary is empty, return the other one
         if not global_parameters:
             return node_parameters
         if not node_parameters:
             return global_parameters
-        
+
         # If both dictionaries have entries, combine them
         combined_parameters = node_parameters.copy()
         for parameter, value in global_parameters.items():
             if parameter not in combined_parameters:
                 combined_parameters[parameter] = value
         return combined_parameters
+
+    @staticmethod
+    def get_extension_values(workflows_old, workflows_new):
+        extension_values = {}
+
+        # Add modified workflows
+        for i in range(len(workflows_old)):
+            num_nodes_1 = len(workflows_old[i]["nodes"])
+            num_nodes_2 = len(workflows_new[i]["nodes"])
+
+            if num_nodes_1 < num_nodes_2:
+                extension_values[workflows_old[i]
+                                 ["name"]] = num_nodes_1
+
+        # Add new workflows
+        for i in range(len(workflows_old), len(workflows_new)):
+            extension_values[workflows_new[i]['name']] = 0
+
+        return extension_values

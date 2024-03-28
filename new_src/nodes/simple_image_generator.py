@@ -1,12 +1,15 @@
+import sys
 import torch
 
 from abc import ABC
 from abc import abstractmethod
 from diffusers.pipelines.auto_pipeline import AutoPipelineForText2Image
+import diffusers
 from PIL.Image import Image
 
 from node import Node
 from helpers.storage_helper import StorageHelper
+from utils import Utils
 
 
 class SimpleImageGenerator(Node):
@@ -33,17 +36,27 @@ class SimpleImageGenerator(Node):
         self.model: TextToImageModel = globals()[model_id](cuda_id)
 
     def run(self) -> None:
-        for compound in self.targets.keys():
-            StorageHelper.create_dir(f'{self.output_dir}/{compound}')
-            for target in [compound] + self.targets[compound]:
+        progress = 0
+        num_targets = len(self.targets)
+        for compound, constituents in self.targets.items():
+            progress += 1
+            sys.stdout.write(
+                f'Processing target {progress} out of {num_targets}\r')
+            sys.stdout.flush()
+
+            compound_output_dir = Utils.join_paths(self.output_dir, compound)
+            Utils.create_dir(compound_output_dir)
+
+            for target in [compound] + constituents:
                 for i in range(self.num_images):
                     image = self.model.generate_image(
                         seed=self.seed + i,
                         prompt=target,
                         steps=self.steps,
                         cfg=self.cfg)
-                    StorageHelper.save_image(
-                        image, f'{self.output_dir}/{compound}/{target}_{i}.png')
+                    image_output_path = Utils.join_paths(
+                        compound_output_dir, f'{target}_{i}.png')
+                    StorageHelper.save_image(image, image_output_path)
 
 
 class TextToImageModel(ABC):
@@ -56,6 +69,7 @@ class TextToImageModel(ABC):
 class SdxlTurbo(TextToImageModel):
 
     def __init__(self, cuda_id: str) -> None:
+        diffusers.utils.logging.disable_progress_bar()
 
         self.pipe = AutoPipelineForText2Image.from_pretrained(
             pretrained_model_or_path='stabilityai/sdxl-turbo',
@@ -63,6 +77,7 @@ class SdxlTurbo(TextToImageModel):
             variant='fp16'
         )
         self.pipe.to(cuda_id)
+        self.pipe.set_progress_bar_config(disable=True)
 
     def generate_image(self, seed: int, prompt: str, steps: int, cfg: float) -> Image:
         generator = torch.manual_seed(seed)
