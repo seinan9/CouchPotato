@@ -41,8 +41,18 @@ class StorageHelper():
         torch.save(vector, file_path)
 
     @staticmethod
-    def save_csv(header, values, file_path):
+    def load_csv(file_path: str) -> list:
+        data = []
+        with open(file_path, 'r') as f:
+            csv_reader = csv.DictReader(f)
+            header = csv_reader.fieldnames
+            for row in csv_reader:
+                data.append(row)
+        return data
+
+    @staticmethod
+    def save_csv(header: list, values: list, file_path: str) -> None:
         with open(file_path, 'w') as f:
-            csvwriter = csv.DictWriter(f, fieldnames=header, delimiter='\t')
-            csvwriter.writeheader()
-            csvwriter.writerows(values)
+            csv_writer = csv.DictWriter(f, fieldnames=header)
+            csv_writer.writeheader()
+            csv_writer.writerows(values)

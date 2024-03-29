@@ -6,8 +6,6 @@ import yaml
 
 class Utils():
 
-    logger = logging.getLogger(__name__)
-
     @staticmethod
     def create_dir(directory_path: str) -> None:
         os.makedirs(directory_path)
@@ -22,7 +20,6 @@ class Utils():
 
     @staticmethod
     def load_config(file_path: str) -> dict:
-        Utils.logger.info('Loading workflow')
         with open(file_path, 'r') as f:
             data = yaml.safe_load(f)
         return data

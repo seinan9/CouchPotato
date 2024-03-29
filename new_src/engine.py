@@ -13,6 +13,7 @@ class Engine():
         self.output_dir = workflow_config['output_dir']
         config_file_path = Utils.join_paths(
             self.output_dir, 'workflow_config.yaml')
+        self.logger.info(f'Initializing run with output directory: {self.output_dir}')
 
         self.is_extension = Utils.is_extension(self.output_dir)
         self.extension_values = {}
@@ -39,7 +40,7 @@ class Engine():
 
             if self.is_extension and workflow_name not in self.extension_values.keys():
                 self.logger.info(
-                    f'Skipping workflow: {workflow_name} due to extension')
+                    f'Skipping workflow: {workflow_name} (extension)')
                 continue
 
             self.logger.info(
@@ -98,7 +99,7 @@ class Engine():
                 # Check if node has to be skipped
                 if self.is_extension and node_counter < self.extension_values[workflow_name]:
                     self.logger.info(
-                        f'Skipping node: {module_name} in workflow: {workflow_name} due to extension')
+                        f'Skipping node: {module_name} in workflow: {workflow_name} (extension)')
                     node_counter += 1
                     previous_node_dir = parameters["output_dir"]
                     continue
@@ -117,15 +118,15 @@ class Engine():
                 # Calculate node execution time
                 node_execution_time = round(time.time() - node_start_time, 2)
                 self.logger.info(
-                    f'Node execution completed: {module_name} in workflow: {workflow_name} (Execution time: {node_execution_time:.2f} s)')
+                    f'Node execution completed: {module_name} in workflow: {workflow_name} (Execution time: {node_execution_time:.2f}s)')
 
             # Calculate workflow execution time
             workflow_execution_time = round(
                 time.time() - workflow_start_time, 2)
             self.logger.info(
-                f'Workflow execution completed: {workflow_name} (Execution time: {workflow_execution_time:.2f} s)')
+                f'Workflow execution completed: {workflow_name} (Execution time: {workflow_execution_time:.2f}s)')
 
         # Calculate total execution time
         total_execution_time = round(time.time() - engine_start_time, 2)
         self.logger.info(
-            f'All workflows executed successfully (Total execution time: {total_execution_time:.2f} s)')
+            f'All workflows executed successfully (Total execution time: {total_execution_time:.2f}s)')
