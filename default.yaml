@@ -1,0 +1,42 @@
+root_output_dir: .data/output/test
+
+global_parameters:
+  targets: 
+    cupcake: [cup, cake]
+    enduser: [end, user]
+    butterfly: [butter, fly]
+  seed: 0
+  cuda_id: 0
+
+workflows:
+  - name: visual
+    nodes:
+      - name: simple_image_generator
+        parameters:
+          num_images: 3
+          model_id: SdxlTurbo
+          steps: 3
+          cfg: 1
+      - name: image_feature_extractor
+        parameters:
+          model_id: VisionTransformer
+      - name: similarity_measurer
+        parameters:
+          measure: cosine
+          dim: 0
+      - name: result_combiner
+        parameters:
+          file_name: similarities.csv
+
+  - name: textual
+    nodes:
+      - name: text_feature_extractor
+        parameters:
+          model_id: FastText
+      - name: similarity_measurer
+        parameters:
+          measure: cosine
+          dim: 0
+      - name: result_combiner
+        parameters:
+          file_name: similarities.csv

@@ -3,6 +3,7 @@ from abc import abstractmethod
 
 
 class Node(ABC):
+    PARAMETERS = {}
 
     @abstractmethod
     def __init__(self) -> None:

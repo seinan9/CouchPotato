@@ -1,8 +1,9 @@
+import argparse
 import logging
 
-from engine import Engine
-from argparser import ArgParser
-from utils import Utils
+from core.engine import Engine
+from core.utils import load_config
+
 
 if __name__ == "__main__":
 
@@ -10,8 +11,14 @@ if __name__ == "__main__":
         format='%(asctime)s - %(levelname)s - %(message)s',
         level=logging.INFO)
 
-    argparser = ArgParser()
+    argparser = argparse.ArgumentParser()
+    argparser.add_argument(
+        '-f',
+        '--file',
+        help='A yaml file containing the workflows.',
+        default='./default.yaml')
     args = argparser.parse_args()
-    workflow_config = Utils.load_config(args.file)
-    engine = Engine(workflow_config)
+
+    config = load_config(args.file)
+    engine = Engine(config)
     engine.start()

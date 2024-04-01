@@ -6,9 +6,12 @@ from abc import ABC
 from abc import abstractmethod
 from PIL.Image import Image
 
-from node import Node
-from helpers.storage_helper import StorageHelper
-from utils import Utils
+from core.node import Node
+from core.utils import create_dir, join_paths
+from task.utils import (list_files,
+                        load_image,
+                        load_targets,
+                        save_vector)
 
 
 class ImageFeatureExtractor(Node):
@@ -25,7 +28,7 @@ class ImageFeatureExtractor(Node):
         self.input_dir = input_dir
         self.output_dir = output_dir
         self.targets = targets if isinstance(
-            targets, dict) else StorageHelper.load_targets(targets)
+            targets, dict) else load_targets(targets)
         self.model: ImageToVectorModel = globals()[model_id](cuda_id)
 
     def run(self) -> None:
@@ -36,20 +39,20 @@ class ImageFeatureExtractor(Node):
             sys.stdout.write(
                 f'Processing target {progress} out of {num_targets}\r')
             sys.stdout.flush()
-            compound_input_dir = Utils.join_paths(self.input_dir, compound)
-            compound_output_dir = Utils.join_paths(self.output_dir, compound)
-            Utils.create_dir(compound_output_dir)
-            file_names = StorageHelper.list_files(compound_input_dir, False)
+            compound_input_dir = join_paths(self.input_dir, compound)
+            compound_output_dir = join_paths(self.output_dir, compound)
+            create_dir(compound_output_dir)
+            file_names = list_files(compound_input_dir, False)
 
             for file_name in file_names:
-                file_input_path = Utils.join_paths(
+                file_input_path = join_paths(
                     compound_input_dir, f'{file_name}.png')
-                file_output_path = Utils.join_paths(
+                file_output_path = join_paths(
                     compound_output_dir, f'{file_name}.pt')
 
-                image = StorageHelper.load_image(file_input_path)
+                image = load_image(file_input_path)
                 vector = self.model.extract_vector(image)
-                StorageHelper.save_vector(vector, file_output_path)
+                save_vector(vector, file_output_path)
 
 
 class ImageToVectorModel(ABC):
