@@ -3,6 +3,7 @@ import torch
 
 from abc import ABC
 from abc import abstractmethod
+from gensim.models import Word2Vec as w2v
 from huggingface_hub import hf_hub_download
 
 from core.node import Node
@@ -15,14 +16,16 @@ class TextFeatureExtractor(Node):
     PARAMETERS = {
         'output_dir': str,
         'targets': dict | str,
-        'model_id': str
+        'model_id': str,
+        'model_path': str
     }
 
-    def __init__(self, output_dir: str, targets: dict | str, model_id: str) -> None:
+    def __init__(self, output_dir: str, targets: dict | str, model_id: str, model_path: str = None) -> None:
         self.output_dir = output_dir
         self.targets = targets if isinstance(
             targets, dict) else load_targets(targets)
         self.model: TextToVectorModel = globals()[model_id]()
+        self.model_path = model_path
 
     def run(self) -> None:
         for compound, constituents in self.targets.items():
@@ -55,3 +58,12 @@ class FastText(TextToVectorModel):
 
     def extract_vector(self, word: str) -> torch.Tensor:
         return torch.from_numpy(self.model[word])
+
+
+class Word2Vec(TextToVectorModel):
+
+    def __init__(self) -> None:
+        self.model = w2v.load(self.model_path)
+
+    def extract_vector(self, word: str) -> torch.Tensor:
+        return self.model.wv[word]
