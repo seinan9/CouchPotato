@@ -24,18 +24,23 @@ class TextFeatureExtractor(Node):
         self.output_dir = output_dir
         self.targets = targets if isinstance(
             targets, dict) else load_targets(targets)
-        self.model: TextToVectorModel = globals()[model_id]()
-        self.model_path = model_path
+        self.model: TextToVectorModel = globals()[model_id](model_path)
 
     def run(self) -> None:
         for compound, constituents in self.targets.items():
             compound_output_dir = join_paths(self.output_dir, compound)
             create_dir(compound_output_dir)
 
-            for target in [compound] + constituents:
-                file_output_path = join_paths(
-                    compound_output_dir, f'{target}_0.pt')
+            for target in [constituents[0] + "_" + constituents[1]] + constituents:
+                if target == constituents[0] + "_" + constituents[1]:
+                    file_output_path = join_paths(
+                        compound_output_dir, f'{compound}.pt'
+                    )
+                else:
+                    file_output_path = join_paths(
+                        compound_output_dir, f'{target}.pt')
                 vector = self.model.extract_vector(target)
+
                 save_vector(vector, file_output_path)
 
 
@@ -48,7 +53,7 @@ class TextToVectorModel(ABC):
 
 class FastText(TextToVectorModel):
 
-    def __init__(self) -> None:
+    def __init__(self, model_path) -> None:
         # monkey patch to supress warning
         fasttext.FastText.eprint = lambda x: None
 
@@ -62,8 +67,8 @@ class FastText(TextToVectorModel):
 
 class Word2Vec(TextToVectorModel):
 
-    def __init__(self) -> None:
-        self.model = w2v.load(self.model_path)
+    def __init__(self, model_path) -> None:
+        self.model = w2v.load(model_path)
 
     def extract_vector(self, word: str) -> torch.Tensor:
-        return self.model.wv[word]
+        return torch.tensor(self.model.wv[word])
