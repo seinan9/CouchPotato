@@ -16,7 +16,7 @@ if __name__ == "__main__":
         '-f',
         '--file',
         help='A yaml file containing the workflows.',
-        default='./default.yaml')
+        default='ImageCompositionality/default.yaml')
     args = argparser.parse_args()
 
     config = load_config(args.file)
