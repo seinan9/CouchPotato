@@ -1,10 +1,10 @@
-import logging
+import sys
 import torch
 
 from abc import ABC
 from abc import abstractmethod
 from diffusers.pipelines.auto_pipeline import AutoPipelineForText2Image
-from diffusers import StableDiffusionXLPipeline, StableDiffusionXLTurboPipeline
+from diffusers import StableDiffusionXLPipeline
 import diffusers
 from PIL.Image import Image
 
@@ -28,8 +28,6 @@ class SimpleImageGenerator(Node):
     }
 
     def __init__(self, output_dir: str, targets: dict | str, seed: int, cuda_id: int, num_images: int, model_type: str, model_path: str, steps: int, cfg: float) -> None:
-        self.logger = logging.getLogger(__name__)
-
         self.output_dir = output_dir
         self.targets = targets if isinstance(
             targets, dict) else load_targets(targets)
@@ -44,7 +42,9 @@ class SimpleImageGenerator(Node):
         num_targets = len(self.targets)
         for compound, constituents in self.targets.items():
             progress += 1
-            self.logger.info('Processing target {progress} out of {num_targets}')
+            sys.stdout.write(
+                f'Processing target {progress} out of {num_targets}\r')
+            sys.stdout.flush()
 
             compound_output_dir = join_paths(self.output_dir, compound)
             create_dir(compound_output_dir)
