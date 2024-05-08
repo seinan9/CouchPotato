@@ -102,7 +102,7 @@ class Engine():
                               for key in required_parameters.keys()}
 
                 # Skip node if was already executed in a previous run
-                if self.is_extension and node_counter < self.extension_values[workflow_name]:
+                if self.is_extension and node_counter <= self.extension_values[workflow_name]:
                     self.logger.info(
                         f'Skipping node: {node_name} in workflow: {workflow_name} (extension)')
                     node_counter += 1
