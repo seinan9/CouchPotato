@@ -1,4 +1,4 @@
-import sys
+import logging
 from bing_image_downloader import downloader
 
 from core.node import Node
@@ -15,6 +15,7 @@ class ImageDownloader(Node):
     }
 
     def __init__(self, output_dir: str, targets: dict | str, num_images: int) -> None:
+        self.logger = logging.getLogger(__name__)
         self.output_dir = output_dir
         self.targets = targets if isinstance(
             targets, dict) else load_targets(targets)
@@ -26,9 +27,8 @@ class ImageDownloader(Node):
         tmp_dir = join_paths(self.output_dir, 'tmp')
         for compound, constituents in self.targets.items():
             progress += 1
-            sys.stdout.write(
-                f'Downloading images for word {progress} out of {num_targets}\r')
-            sys.stdout.flush()
+            self.logger.progress(
+                f'Processing target {progress} out of {num_targets}')
 
             for word in [compound] + constituents:
                 downloader.download(

@@ -1,4 +1,4 @@
-import sys
+import logging
 import torch
 
 from abc import ABC
@@ -28,6 +28,7 @@ class SimpleImageGenerator(Node):
     }
 
     def __init__(self, output_dir: str, targets: dict | str, seed: int, cuda_id: int, num_images: int, model_type: str, model_path: str, steps: int, cfg: float) -> None:
+        self.logger = logging.getLogger(__name__)
         self.output_dir = output_dir
         self.targets = targets if isinstance(
             targets, dict) else load_targets(targets)
@@ -35,17 +36,16 @@ class SimpleImageGenerator(Node):
         self.num_images = num_images
         self.steps = steps
         self.cfg = cfg
-        self.model: TextToImageModel = globals()[model_type](model_path, cuda_id)
+        self.model: TextToImageModel = globals(
+        )[model_type](model_path, cuda_id)
 
     def run(self) -> None:
         progress = 0
         num_targets = len(self.targets)
         for compound, constituents in self.targets.items():
             progress += 1
-            sys.stdout.write(
-                f'Processing target {progress} out of {num_targets}\r')
-            sys.stdout.flush()
-
+            self.logger.progress(
+                f'Processing target {progress} out of {num_targets}')
             compound_output_dir = join_paths(self.output_dir, compound)
             create_dir(compound_output_dir)
 
@@ -70,7 +70,7 @@ class TextToImageModel(ABC):
 
 class StableDiffusionXL(TextToImageModel):
 
-    def __init__(self, model_path:str, cuda_id: str) -> None:
+    def __init__(self, model_path: str, cuda_id: str) -> None:
         diffusers.utils.logging.disable_progress_bar()
         self.pipe = StableDiffusionXLPipeline.from_single_file(
             pretrained_model_link_or_path=model_path,
@@ -93,6 +93,8 @@ class StableDiffusionXL(TextToImageModel):
             ).images[0]
 
 # TODO: add model_path param or merge with SDXL if possible (and download model to models dir)
+
+
 class SdxlTurbo(TextToImageModel):
 
     def __init__(self, model_path: str, cuda_id: str) -> None:

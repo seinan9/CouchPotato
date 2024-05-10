@@ -5,11 +5,24 @@ from core.engine import Engine
 from core.utils import load_config
 
 
+PROGRESS = 25
+logging.addLevelName(PROGRESS, "PROGRESS")
+
+
+def progress(self, message, *args, **kwargs):
+    if self.isEnabledFor(PROGRESS):
+        formatter = logging.Formatter(
+            fmt='%(asctime)s - %(levelname)s - %(message)s')
+        print(formatter.format(logging.LogRecord(self.name, PROGRESS,
+              "", 0, message+"\r", args, None)), end="", flush=True)
+
+
 if __name__ == "__main__":
 
     logging.basicConfig(
         format='%(asctime)s - %(levelname)s - %(message)s',
         level=logging.INFO)
+    logging.Logger.progress = progress
 
     argparser = argparse.ArgumentParser()
     argparser.add_argument(

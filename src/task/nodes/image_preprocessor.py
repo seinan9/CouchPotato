@@ -1,4 +1,4 @@
-import sys
+import logging
 from PIL import Image
 
 from core.node import Node
@@ -17,6 +17,7 @@ class ImagePreprocessor(Node):
     }
 
     def __init__(self, input_dir: str, output_dir: str, targets: dict | str, width: str, height: str) -> None:
+        self.logger = logging.getLogger(__name__)
         self.input_dir = input_dir
         self.output_dir = output_dir
         self.targets = targets if isinstance(
@@ -29,9 +30,9 @@ class ImagePreprocessor(Node):
         num_targets = len(self.targets)
         for compound in self.targets.keys():
             progress += 1
-            sys.stdout.write(
-                f'Preprocessing images for target {progress} out of {num_targets}\r')
-            sys.stdout.flush()
+            self.logger.progress(
+                f'Processing target {progress} out of {num_targets}')
+
             compound_input_dir = join_paths(self.input_dir, compound)
             compound_output_dir = join_paths(self.output_dir, compound)
             create_dir(compound_output_dir)
