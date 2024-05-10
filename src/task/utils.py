@@ -20,6 +20,10 @@ def list_files(directory_path: str, include_extensions: bool) -> list[str]:
     return files
 
 
+def move_file(current_file_path, new_file_path):
+    os.rename(current_file_path, new_file_path)
+
+
 def load_image(file_path: str) -> Image.Image:
     image = Image.open(file_path)
     return image

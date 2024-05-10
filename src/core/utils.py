@@ -19,6 +19,10 @@ def create_dir(directory_path: str) -> None:
     os.makedirs(directory_path)
 
 
+def remove_dir(directory_path: str) -> None:
+    os.rmdir(directory_path)
+
+
 def join_paths(*paths: str) -> str:
     return os.path.join(*paths)
 
