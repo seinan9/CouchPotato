@@ -13,6 +13,12 @@ def load_targets(file_path: str) -> dict:
     return targets
 
 
+def load_sentences(file_path: str) -> list:
+    with open(file_path, 'r') as f:
+        sentences = f.readlines()
+    return sentences
+
+
 def list_files(directory_path: str, include_extensions: bool) -> list[str]:
     files = natsorted(os.listdir(directory_path))
     if not include_extensions:
