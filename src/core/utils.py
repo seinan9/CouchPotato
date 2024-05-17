@@ -56,8 +56,8 @@ def is_extension(directory_path: str) -> bool:
     return os.path.exists(directory_path)
 
 
-def get_extension_values(workflows_old, workflows_new):
-    extension_values = {}
+def get_workflows_to_run(workflows_old, workflows_new):
+    workflows_to_run = {}
 
     # Add modified workflows
     for i in range(len(workflows_old)):
@@ -65,11 +65,11 @@ def get_extension_values(workflows_old, workflows_new):
         num_nodes_2 = len(workflows_new[i]["nodes"])
 
         if num_nodes_1 < num_nodes_2:
-            extension_values[workflows_old[i]
+            workflows_to_run[workflows_old[i]
                              ["name"]] = num_nodes_1
 
     # Add new workflows
     for i in range(len(workflows_old), len(workflows_new)):
-        extension_values[workflows_new[i]['name']] = 1
+        workflows_to_run[workflows_new[i]['name']] = 0
 
-    return extension_values
+    return workflows_to_run

@@ -5,7 +5,7 @@ import time
 from core.utils import (combine_parameters,
                         convert_module_name_to_class_name,
                         create_dir,
-                        get_extension_values,
+                        get_workflows_to_run,
                         is_extension,
                         join_paths,
                         load_config,
@@ -24,14 +24,14 @@ class Engine():
 
         # Check if the run is an extension
         self.is_extension = is_extension(self.root_output_dir)
-        self.extension_values = {}
+        self.workflows_to_run = {}
         if not self.is_extension:
             create_dir(self.root_output_dir)
         else:
             self.logger.info(f'Identified extension to previous run')
             previous_workflow_config = load_config(config_file_path)
             self.is_extension = True
-            self.extension_values = get_extension_values(
+            self.workflows_to_run = get_workflows_to_run(
                 previous_workflow_config['workflows'], config['workflows'])
 
         save_config(config, config_file_path)
@@ -47,7 +47,7 @@ class Engine():
         for workflow in self.workflows:
             workflow_name = workflow['name']
 
-            if self.is_extension and workflow_name not in self.extension_values.keys():
+            if self.is_extension and workflow_name not in self.workflows_to_run.keys():
                 self.logger.info(
                     f'Skipping workflow: {workflow_name} (extension)')
                 continue
@@ -57,7 +57,7 @@ class Engine():
             workflow_start_time = time.time()
 
             workflow_dir = join_paths(self.root_output_dir, workflow_name)
-            if not self.is_extension:
+            if not self.is_extension or workflow_name in self.workflows_to_run.keys():
                 create_dir(workflow_dir)
 
             node_counter = 1
@@ -102,7 +102,7 @@ class Engine():
                               for key in required_parameters.keys()}
 
                 # Skip node if was already executed in a previous run
-                if self.is_extension and node_counter <= self.extension_values[workflow_name]:
+                if self.is_extension and node_counter <= self.workflows_to_run[workflow_name]:
                     self.logger.info(
                         f'Skipping node: {node_name} in workflow: {workflow_name} (extension)')
                     node_counter += 1
