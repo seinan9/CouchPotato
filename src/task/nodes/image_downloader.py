@@ -37,7 +37,7 @@ class ImageDownloader(Node):
                     output_dir=tmp_dir,
                     adult_filter_off=True,
                     force_replace=False,
-                    timeout=60,
+                    timeout=3,
                     verbose=False,
                     filter="photo"
                 )
