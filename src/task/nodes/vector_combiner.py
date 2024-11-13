@@ -54,3 +54,6 @@ class VectorCombiner(Node):
 
     def mean(self, tensor: torch.Tensor, dim: int) -> torch.Tensor:
         return torch.mean(tensor, dim)
+
+    def max(self, tensor: torch.Tensor, dim: int) -> torch.Tensor:
+        return torch.max(tensor, dim)[0]

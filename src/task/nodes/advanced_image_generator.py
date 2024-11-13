@@ -4,7 +4,7 @@ import torch
 from abc import ABC
 from abc import abstractmethod
 from diffusers.pipelines.auto_pipeline import AutoPipelineForText2Image
-from diffusers import StableDiffusionXLPipeline
+from diffusers import StableDiffusionXLPipeline, Transformer2DModel, PixArtSigmaPipeline
 import diffusers
 from PIL.Image import Image
 
@@ -85,6 +85,38 @@ class StableDiffusionXL(TextToImageModel):
             pretrained_model_link_or_path=model_path,
             torch_dtype=torch.float16,
             use_safetensors=True
+        )
+        self.pipe.to(f'cuda:{cuda_id}')
+        self.pipe.set_progress_bar_config(disable=True)
+
+    def generate_image(self, seed: int, prompt: str, steps: int, cfg: float) -> Image:
+        generator = torch.manual_seed(seed)
+        with torch.no_grad():
+            return self.pipe(
+                prompt=prompt,
+                num_inference_steps=steps,
+                classifier_guidance=cfg,
+                generator=generator,
+                width=1024,
+                height=1024
+            ).images[0]
+
+
+class PixArtSigma(TextToImageModel):
+
+    def __init__(self, model_path: str, cuda_id: str) -> None:
+        transformer = Transformer2DModel.from_pretrained(
+            pretrained_model_name_or_path="PixArt-alpha/PixArt-Sigma-XL-2-1024-MS", 
+            subfolder='transformer', 
+            torch_dtype=torch.float16,
+            use_safetensors=True,
+        )
+
+        self.pipe = PixArtSigmaPipeline.from_pretrained(
+            pretrained_model_name_or_path="PixArt-alpha/pixart_sigma_sdxlvae_T5_diffusers",
+            transformer=transformer,
+            torch_dtype=torch.float16,
+            use_safetensors=True,
         )
         self.pipe.to(f'cuda:{cuda_id}')
         self.pipe.set_progress_bar_config(disable=True)

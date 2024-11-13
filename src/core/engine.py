@@ -57,7 +57,7 @@ class Engine():
             workflow_start_time = time.time()
 
             workflow_dir = join_paths(self.root_output_dir, workflow_name)
-            if not self.is_extension or workflow_name in self.workflows_to_run.keys():
+            if not self.is_extension or (workflow_name in self.workflows_to_run.keys() and self.workflows_to_run[workflow_name] == 0):
                 create_dir(workflow_dir)
 
             node_counter = 1
