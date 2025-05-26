@@ -3,25 +3,19 @@ from abc import ABC, abstractmethod
 
 import diffusers
 import torch
+from couch_potato.core.node import Node
+from couch_potato.core.utils import create_dir, join_paths
+from couch_potato.task.utils import load_targets, save_image
 from diffusers import PixArtSigmaPipeline, StableDiffusionXLPipeline, Transformer2DModel
 from diffusers.pipelines.auto_pipeline import AutoPipelineForText2Image
 from PIL.Image import Image
 
-from ImageCompositionality.src.core.node import Node
-from ImageCompositionality.src.core.utils import create_dir, join_paths
-from ImageCompositionality.src.task.utils import (
-    load_sentences,
-    load_targets,
-    save_image,
-)
 
-
-class AdvancedImageGenerator(Node):
+class SimpleImageGenerator(Node):
 
     PARAMETERS = {
         "output_dir": str,
-        "targets": dict | str,
-        "prompts_dir": str,
+        "targets": dict,
         "seed": int,
         "cuda_id": int,
         "num_images": int,
@@ -35,7 +29,6 @@ class AdvancedImageGenerator(Node):
         self,
         output_dir: str,
         targets: dict | str,
-        prompts_dir: str,
         seed: int,
         cuda_id: int,
         num_images: int,
@@ -47,7 +40,6 @@ class AdvancedImageGenerator(Node):
         self.logger = logging.getLogger(__name__)
         self.output_dir = output_dir
         self.targets = targets if isinstance(targets, dict) else load_targets(targets)
-        self.prompts_dir = prompts_dir
         self.seed = seed
         self.num_images = num_images
         self.steps = steps
@@ -59,28 +51,20 @@ class AdvancedImageGenerator(Node):
         num_targets = len(self.targets)
         for compound, constituents in self.targets.items():
             progress += 1
-            self.logger.progress(f"Processing targets {progress} out of {num_targets}")
+            self.logger.progress(f"Processing target {progress} out of {num_targets}")
             compound_output_dir = join_paths(self.output_dir, compound)
             create_dir(compound_output_dir)
 
             for target in [compound] + constituents:
-                if target == compound:
-                    target_sentences_file = join_paths(
-                        self.prompts_dir, f"{constituents[0]}_{constituents[1]}"
-                    )
-                else:
-                    target_sentences_file = join_paths(self.prompts_dir, target)
-                sentences = load_sentences(target_sentences_file)
-                num_images = min(self.num_images, len(sentences))
-                for i in range(0, num_images):
+                for i in range(1, self.num_images + 1):
                     image = self.model.generate_image(
                         seed=self.seed + i,
-                        prompt=sentences[i],
+                        prompt=target,
                         steps=self.steps,
                         cfg=self.cfg,
                     )
                     image_output_path = join_paths(
-                        compound_output_dir, f"{target}_{i+1}.png"
+                        compound_output_dir, f"{target}_{i}.png"
                     )
                     save_image(image, image_output_path)
 
@@ -114,6 +98,30 @@ class StableDiffusionXL(TextToImageModel):
                 generator=generator,
                 width=1024,
                 height=1024,
+            ).images[0]
+
+
+class SdxlTurbo(TextToImageModel):
+
+    def __init__(self, model_path: str, cuda_id: str) -> None:
+        diffusers.utils.logging.disable_progress_bar()
+
+        self.pipe = AutoPipelineForText2Image.from_pretrained(
+            pretrained_model_or_path="stabilityai/sdxl-turbo",
+            torch_dtype=torch.float16,
+            variant="fp16",
+        )
+        self.pipe.to(cuda_id)
+        self.pipe.set_progress_bar_config(disable=True)
+
+    def generate_image(self, seed: int, prompt: str, steps: int, cfg: float) -> Image:
+        generator = torch.manual_seed(seed)
+        with torch.no_grad():
+            return self.pipe(
+                prompt=prompt,
+                num_inference_steps=steps,
+                classifier_guidance=cfg,
+                generator=generator,
             ).images[0]
 
 

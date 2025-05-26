@@ -1,6 +1,6 @@
-from ImageCompositionality.src.core.node import Node
-from ImageCompositionality.src.core.utils import create_dir, join_paths
-from ImageCompositionality.src.task.utils import load_csv, load_targets, save_csv
+from couch_potato.core.node import Node
+from couch_potato.core.utils import create_dir, join_paths
+from couch_potato.task.utils import load_csv, load_targets, save_csv
 
 
 class ResultCombiner(Node):

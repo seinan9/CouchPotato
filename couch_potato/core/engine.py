@@ -2,7 +2,7 @@ import importlib
 import logging
 import time
 
-from ImageCompositionality.src.core.utils import (
+from couch_potato.core.utils import (
     combine_parameters,
     convert_module_name_to_class_name,
     create_dir,

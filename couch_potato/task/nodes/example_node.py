@@ -1,4 +1,4 @@
-from ImageCompositionality.src.core.node import Node
+from couch_potato.core.node import Node
 
 
 class ExampleNode(Node):

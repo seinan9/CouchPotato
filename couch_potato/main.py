@@ -1,8 +1,8 @@
 import argparse
 import logging
 
-from ImageCompositionality.src.core.engine import Engine
-from ImageCompositionality.src.core.utils import load_config
+from couch_potato.core.engine import Engine
+from couch_potato.core.utils import load_config
 
 PROGRESS = 25
 logging.addLevelName(PROGRESS, "PROGRESS")

@@ -3,13 +3,12 @@ from abc import ABC, abstractmethod
 import fasttext
 import spacy
 import torch
+from couch_potato.core.node import Node
+from couch_potato.core.utils import create_dir, join_paths
+from couch_potato.task.utils import load_targets, save_vector
 from gensim.models import Word2Vec as w2v
 from huggingface_hub import hf_hub_download
 from transformers import BertModel, BertTokenizer
-
-from ImageCompositionality.src.core.node import Node
-from ImageCompositionality.src.core.utils import create_dir, join_paths
-from ImageCompositionality.src.task.utils import load_targets, save_vector
 
 
 class TextFeatureExtractor(Node):

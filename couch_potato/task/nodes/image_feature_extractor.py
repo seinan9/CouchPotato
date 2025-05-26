@@ -3,16 +3,10 @@ from abc import ABC, abstractmethod
 
 import torch
 import torchvision
+from couch_potato.core.node import Node
+from couch_potato.core.utils import create_dir, join_paths
+from couch_potato.task.utils import list_files, load_image, load_targets, save_vector
 from PIL.Image import Image
-
-from ImageCompositionality.src.core.node import Node
-from ImageCompositionality.src.core.utils import create_dir, join_paths
-from ImageCompositionality.src.task.utils import (
-    list_files,
-    load_image,
-    load_targets,
-    save_vector,
-)
 
 
 class ImageFeatureExtractor(Node):

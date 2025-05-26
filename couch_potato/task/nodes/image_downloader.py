@@ -1,10 +1,9 @@
 import logging
 
 from bing_image_downloader import downloader
-
-from ImageCompositionality.src.core.node import Node
-from ImageCompositionality.src.core.utils import create_dir, join_paths, remove_dir
-from ImageCompositionality.src.task.utils import list_files, load_targets, move_file
+from couch_potato.core.node import Node
+from couch_potato.core.utils import create_dir, join_paths, remove_dir
+from couch_potato.task.utils import list_files, load_targets, move_file
 
 
 class ImageDownloader(Node):
