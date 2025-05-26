@@ -1,27 +1,39 @@
 import logging
+
 from PIL import Image
 
-from core.node import Node
-from core.utils import join_paths, create_dir
-from task.utils import load_targets, list_files, load_image, save_image
+from ImageCompositionality.src.core.node import Node
+from ImageCompositionality.src.core.utils import create_dir, join_paths
+from ImageCompositionality.src.task.utils import (
+    list_files,
+    load_image,
+    load_targets,
+    save_image,
+)
 
 
 class ImagePreprocessor(Node):
 
     PARAMETERS = {
-        'input_dir': str,
-        'output_dir': str,
-        'targets': dict | str,
-        'width': str,
-        'height': str
+        "input_dir": str,
+        "output_dir": str,
+        "targets": dict | str,
+        "width": str,
+        "height": str,
     }
 
-    def __init__(self, input_dir: str, output_dir: str, targets: dict | str, width: str, height: str) -> None:
+    def __init__(
+        self,
+        input_dir: str,
+        output_dir: str,
+        targets: dict | str,
+        width: str,
+        height: str,
+    ) -> None:
         self.logger = logging.getLogger(__name__)
         self.input_dir = input_dir
         self.output_dir = output_dir
-        self.targets = targets if isinstance(
-            targets, dict) else load_targets(targets)
+        self.targets = targets if isinstance(targets, dict) else load_targets(targets)
         self.width = width
         self.height = height
 
@@ -30,8 +42,7 @@ class ImagePreprocessor(Node):
         num_targets = len(self.targets)
         for compound in self.targets.keys():
             progress += 1
-            self.logger.progress(
-                f'Processing target {progress} out of {num_targets}')
+            self.logger.progress(f"Processing target {progress} out of {num_targets}")
 
             compound_input_dir = join_paths(self.input_dir, compound)
             compound_output_dir = join_paths(self.output_dir, compound)
@@ -41,11 +52,10 @@ class ImagePreprocessor(Node):
             for file_name in file_names:
                 file_input_path = join_paths(compound_input_dir, file_name)
                 file_output_name = f'{file_name.split(".")[0]}.png'
-                file_output_path = join_paths(
-                    compound_output_dir, file_output_name)
+                file_output_path = join_paths(compound_output_dir, file_output_name)
 
                 image = load_image(file_input_path)
-                image = image.convert('RGB')
+                image = image.convert("RGB")
                 image = self.resize(image, min(self.width, self.height))
                 image = self.crop(image, self.width, self.height)
                 save_image(image, file_output_path)

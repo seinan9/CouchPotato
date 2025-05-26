@@ -1,22 +1,32 @@
 from scipy.stats import spearmanr
 
-from core.node import Node
-from core.utils import create_dir, join_paths
-from task.utils import load_csv, save_csv
+from ImageCompositionality.src.core.node import Node
+from ImageCompositionality.src.core.utils import create_dir, join_paths
+from ImageCompositionality.src.task.utils import load_csv, save_csv
+
 
 class CorrelationCalculator(Node):
 
     PARAMETERS = {
-        'input_file_0': str,
-        'input_file_1': str,
-        'columns_0': list,
-        'columns_1': list,
-        'output_dir': str,
-        'output_header': list,
-        'measure': str
+        "input_file_0": str,
+        "input_file_1": str,
+        "columns_0": list,
+        "columns_1": list,
+        "output_dir": str,
+        "output_header": list,
+        "measure": str,
     }
 
-    def __init__(self, input_file_0: str, input_file_1: str, columns_0: list, columns_1: list,  output_dir: str, output_header: list, measure: str) -> None:
+    def __init__(
+        self,
+        input_file_0: str,
+        input_file_1: str,
+        columns_0: list,
+        columns_1: list,
+        output_dir: str,
+        output_header: list,
+        measure: str,
+    ) -> None:
         self.data_0 = load_csv(input_file_0)
         self.data_1 = load_csv(input_file_1)
 
@@ -40,9 +50,9 @@ class CorrelationCalculator(Node):
             correlation = round(self.measure(values_0, values_1), 3)
             correlations[self.output_header[i]] = correlation
 
-        output_file = join_paths(self.output_dir, 'correlations.csv')
+        output_file = join_paths(self.output_dir, "correlations.csv")
         save_csv(self.output_header, [correlations], output_file)
 
     def spearman(self, values_0: list, values_1: list) -> float:
-        correlation, p_value = spearmanr(values_0, values_1)
+        correlation, _ = spearmanr(values_0, values_1)
         return correlation

@@ -1,12 +1,9 @@
-from core.node import Node
+from ImageCompositionality.src.core.node import Node
 
 
 class ExampleNode(Node):
 
-    PARAMETERS = {
-        'name': str,
-        'age': int
-    }
+    PARAMETERS = {"name": str, "age": int}
 
     def __init__(self, name: str, age: int) -> None:
         self.name = name
