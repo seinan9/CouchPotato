@@ -3,11 +3,10 @@ from couch_potato.core.node import Node
 
 class ExampleNode(Node):
 
-    PARAMETERS = {"name": str, "age": int}
+    PARAMETERS = {"message": str}
 
-    def __init__(self, name: str, age: int) -> None:
-        self.name = name
-        self.age = age
+    def __init__(self, message: str) -> None:
+        self.message = message
 
     def run(self):
-        print(self.name, self.age)
+        print(self.message)

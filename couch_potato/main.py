@@ -30,12 +30,7 @@ if __name__ == "__main__":
     logging.Logger.progress = progress
 
     argparser = argparse.ArgumentParser()
-    argparser.add_argument(
-        "-f",
-        "--file",
-        help="A yaml file containing the workflows.",
-        default="ImageCompositionality/default.yaml",
-    )
+    argparser.add_argument("-f", "--file", help="A yaml file containing the workflows.")
     args = argparser.parse_args()
 
     config = load_config(args.file)
