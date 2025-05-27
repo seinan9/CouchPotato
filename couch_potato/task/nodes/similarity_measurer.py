@@ -5,6 +5,16 @@ from couch_potato.task.utils import load_targets, load_vector, save_csv
 
 
 class SimilarityMeasurer(Node):
+    """
+    Node to compute similarity scores between compound images and their constituents.
+
+    Parameters:
+        - input_dir: Directory containing vector files (.pt) for each compound and constituent.
+        - output_dir: Directory where the similarity results will be saved.
+        - targets: Dictionary or YAML file mapping compounds to two constituents.
+        - measure: Name of the similarity function to use (e.g. 'cosine').
+        - dim: Dimension over which to compute the similarity.
+    """
 
     PARAMETERS = {
         "input_dir": str,

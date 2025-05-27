@@ -1,4 +1,3 @@
-import logging
 from abc import ABC, abstractmethod
 
 import torch
@@ -7,16 +6,30 @@ from couch_potato.core.node import Node
 from couch_potato.core.utils import create_dir, join_paths
 from couch_potato.task.utils import list_files, load_image, load_targets, save_vector
 from PIL.Image import Image
+from tqdm import tqdm
 
 
 class ImageFeatureExtractor(Node):
+    """
+    Node to extract feature vectors from images using a specified deep vision model.
+
+    This node processes images organized by compound names and extracts vector representations
+    using a model such as a Vision Transformer (ViT). Outputs are saved as PyTorch tensor files.
+
+    Parameters:
+        - input_dir: Directory containing folders named after compounds, with images inside.
+        - output_dir: Directory where extracted vectors will be saved.
+        - targets: Dictionary or YAML path mapping compounds to their constituents.
+        - cuda_id: GPU device ID to use for inference.
+        - model_name: String identifier for the image model to use (e.g., "vit").
+    """
 
     PARAMETERS = {
         "input_dir": str,
         "output_dir": str,
         "targets": dict,
         "cuda_id": int,
-        "model_id": str,
+        "model_name": str,
     }
 
     def __init__(
@@ -25,26 +38,24 @@ class ImageFeatureExtractor(Node):
         output_dir: str,
         targets: dict | str,
         cuda_id: int,
-        model_id: str,
+        model_name: str,
     ) -> None:
-        self.logger = logging.getLogger(__name__)
         self.input_dir = input_dir
         self.output_dir = output_dir
         self.targets = targets if isinstance(targets, dict) else load_targets(targets)
-        self.model: ImageToVectorModel = globals()[model_id](cuda_id)
+        self.model = create_model(model_name, cuda_id)
 
     def run(self) -> None:
-        progress = 0
-        num_targets = len(self.targets)
-        for compound in self.targets.keys():
-            progress += 1
-            self.logger.progress(f"Processing target {progress} out of {num_targets}")
+        # Iterate over each compound and extract features from the images in its subdirectory (this contains images for the compound and the constituents)
+        for compound in tqdm(
+            self.targets.keys(), desc="Extracting features for targets"
+        ):
 
             compound_input_dir = join_paths(self.input_dir, compound)
             compound_output_dir = join_paths(self.output_dir, compound)
             create_dir(compound_output_dir)
-            file_names = list_files(compound_input_dir, False)
 
+            file_names = list_files(compound_input_dir, False)
             for file_name in file_names:
                 file_input_path = join_paths(compound_input_dir, f"{file_name}.png")
                 file_output_path = join_paths(compound_output_dir, f"{file_name}.pt")
@@ -64,15 +75,18 @@ class ImageToVectorModel(ABC):
 class VisionTransformer(ImageToVectorModel):
 
     def __init__(self, cuda_id: int) -> None:
-        self.cuda_id = cuda_id
+        self.device = torch.device(f"cuda:{cuda_id}")
         self.model = torchvision.models.vit_h_14(
             weights=torchvision.models.ViT_H_14_Weights.DEFAULT
         )
-        self.model.heads = torch.nn.Sequential(*list(self.model.heads.children())[:-1])
-        self.model.to(self.cuda_id)
 
-    def extract_vector(self, image: Image) -> torch.Tensor:
-        transformations = torchvision.transforms.Compose(
+        # Remove the classification head to get pure feature vectors
+        self.model.heads = torch.nn.Sequential(*list(self.model.heads.children())[:-1])
+        self.model.to(self.device)
+        self.model.eval()  # TODO: Check whether this makes a difference
+
+        # Standard ImageNet preprocessing and resizing
+        self.transform = torchvision.transforms.Compose(
             [
                 torchvision.transforms.ToTensor(),
                 torchvision.transforms.Normalize(
@@ -81,5 +95,16 @@ class VisionTransformer(ImageToVectorModel):
                 torchvision.transforms.Resize((518, 518)),
             ]
         )
-        image = transformations(image).float().unsqueeze_(0).to(self.cuda_id)
-        return self.model(image).squeeze(0).detach().cpu()
+
+    def extract_vector(self, image: Image) -> torch.Tensor:
+        # Preprocess, move to GPU, run through model, detach and move to CPU
+        image = self.transform(image).float().unsqueeze_(0).to(self.device)
+        with torch.no_grad():
+            return self.model(image).squeeze(0).cpu()
+
+
+def create_model(model_name: str, cuda_id: str) -> ImageToVectorModel:
+    if model_name == "vit":
+        return VisionTransformer(cuda_id)
+    else:
+        raise ValueError(f"Unknown model name: {model_name}")

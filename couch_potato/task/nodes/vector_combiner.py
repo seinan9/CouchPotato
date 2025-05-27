@@ -7,6 +7,19 @@ from couch_potato.task.utils import list_files, load_targets, load_vector, save_
 
 
 class VectorCombiner(Node):
+    """
+    Node to combine multiple vectors per target (compound or constituent) into a single vector.
+
+    It groups vector files by their target prefix (e.g., 'word_1.pt', 'word_2.pt'), stacks
+    them into a tensor, and reduces them along a specified dimension using a method like mean or max.
+
+    Parameters:
+        - input_dir: Directory containing vector files organized by compounds.
+        - output_dir: Directory where combined vectors will be saved.
+        - targets: Dictionary or YAML mapping compounds to their constituents.
+        - method: Reduction method for stacking vectors ('mean' or 'max').
+        - dim: Dimension along which to reduce the tensor.
+    """
 
     PARAMETERS = {
         "input_dir": str,

@@ -1,19 +1,28 @@
-import logging
-
 from couch_potato.core.node import Node
 from couch_potato.core.utils import create_dir, join_paths
 from couch_potato.task.utils import list_files, load_image, load_targets, save_image
 from PIL import Image
+from tqdm import tqdm
 
 
 class ImagePreprocessor(Node):
+    """
+    Node for preprocessing images by resizing and cropping.
+
+    Parameters:
+        - input_dir: Directory with original images.
+        - output_dir: Directory to store preprocessed images.
+        - targets: Dictionary or YAML path mapping compounds to their constituents.
+        - width: Desired width after cropping.
+        - height: Desired height after cropping.
+    """
 
     PARAMETERS = {
         "input_dir": str,
         "output_dir": str,
         "targets": dict | str,
-        "width": str,
-        "height": str,
+        "width": int,
+        "height": int,
     }
 
     def __init__(
@@ -21,10 +30,9 @@ class ImagePreprocessor(Node):
         input_dir: str,
         output_dir: str,
         targets: dict | str,
-        width: str,
-        height: str,
+        width: int,
+        height: int,
     ) -> None:
-        self.logger = logging.getLogger(__name__)
         self.input_dir = input_dir
         self.output_dir = output_dir
         self.targets = targets if isinstance(targets, dict) else load_targets(targets)
@@ -32,12 +40,8 @@ class ImagePreprocessor(Node):
         self.height = height
 
     def run(self) -> None:
-        progress = 0
-        num_targets = len(self.targets)
-        for compound in self.targets.keys():
-            progress += 1
-            self.logger.progress(f"Processing target {progress} out of {num_targets}")
-
+        # Loop over each compound and process its images
+        for compound in tqdm(self.targets.keys(), desc="Preprocessing images"):
             compound_input_dir = join_paths(self.input_dir, compound)
             compound_output_dir = join_paths(self.output_dir, compound)
             create_dir(compound_output_dir)
@@ -55,6 +59,9 @@ class ImagePreprocessor(Node):
                 save_image(image, file_output_path)
 
     def resize(self, image: Image, min_size: int) -> Image:
+        """
+        Resize images such that the smaller dimension equals 'min_size', maintaining aspect ratio
+        """
         width, height = image.size
         min_dimension = min(width, height)
         if min_dimension != min_size:
@@ -64,6 +71,9 @@ class ImagePreprocessor(Node):
         return image.resize((width, height), Image.Resampling.LANCZOS)
 
     def crop(self, image: Image, width: int, height: int) -> Image:
+        """
+        Center crop image to the given with and height
+        """
         current_width, current_height = image.size
         left = (current_width - width) / 2
         top = (current_height - height) / 2

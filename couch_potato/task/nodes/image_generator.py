@@ -1,20 +1,21 @@
-import logging
 from abc import ABC, abstractmethod
 
 import diffusers
 import torch
 from couch_potato.core.node import Node
 from couch_potato.core.utils import create_dir, join_paths
-from couch_potato.task.utils import load_targets, save_image
+from couch_potato.task.utils import load_sentences, load_targets, save_image
 from diffusers import PixArtSigmaPipeline, StableDiffusionXLPipeline, Transformer2DModel
 from PIL.Image import Image
+from tqdm import tqdm
 
 
-class SimpleImageGenerator(Node):
+class ImageGenerator(Node):
 
     PARAMETERS = {
         "output_dir": str,
-        "targets": dict,
+        "targets": dict | str,
+        "prompts_dir": str,
         "seed": int,
         "cuda_id": int,
         "num_images": int,
@@ -27,6 +28,7 @@ class SimpleImageGenerator(Node):
         self,
         output_dir: str,
         targets: dict | str,
+        prompts_dir: str,
         seed: int,
         cuda_id: int,
         num_images: int,
@@ -34,9 +36,9 @@ class SimpleImageGenerator(Node):
         steps: int,
         cfg: float,
     ) -> None:
-        self.logger = logging.getLogger(__name__)
         self.output_dir = output_dir
         self.targets = targets if isinstance(targets, dict) else load_targets(targets)
+        self.prompts_dir = None if prompts_dir in ("", "empty", None) else prompts_dir
         self.seed = seed
         self.num_images = num_images
         self.steps = steps
@@ -44,26 +46,34 @@ class SimpleImageGenerator(Node):
         self.model: TextToImageModel = create_model(model_name, cuda_id)
 
     def run(self) -> None:
-        progress = 0
-        num_targets = len(self.targets)
-        for compound, constituents in self.targets.items():
-            progress += 1
-            self.logger.progress(f"Processing target {progress} out of {num_targets}")
+        for compound, constituents in tqdm(
+            self.targets.items(), desc="Generating images for targets"
+        ):
             compound_output_dir = join_paths(self.output_dir, compound)
             create_dir(compound_output_dir)
 
-            for target in [compound] + constituents:
-                for i in range(1, self.num_images + 1):
+            for word in [compound] + constituents:
+                if self.prompts_dir:
+                    file_name = (
+                        f"{constituents[0]}_{constituents[1]}"
+                        if word == compound
+                        else word
+                    )
+                    prompt_path = join_paths(self.prompts_dir, file_name)
+                    prompts = load_sentences(prompt_path)
+                    used_prompts = prompts[: self.num_images]
+                else:
+                    used_prompts = [word] * self.num_images
+
+                for i, prompt in enumerate(used_prompts):
                     image = self.model.generate_image(
                         seed=self.seed + i,
-                        prompt=target,
+                        prompt=prompt,
                         steps=self.steps,
                         cfg=self.cfg,
                     )
-                    image_output_path = join_paths(
-                        compound_output_dir, f"{target}_{i}.png"
-                    )
-                    save_image(image, image_output_path)
+                    out_path = join_paths(compound_output_dir, f"{word}_{i+1}.png")
+                    save_image(image, out_path)
 
 
 class TextToImageModel(ABC):
