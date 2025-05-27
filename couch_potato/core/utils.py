@@ -1,75 +1,83 @@
-import os
+import logging
 import re
 
 import yaml
 
 
-def load_config(file_path: str) -> dict:
-    with open(file_path, "r") as f:
+def setup_logging(log_file: str) -> None:
+    """
+    Configure logging to output both to console and a file in the output directory.
+
+    Args:
+        output_dir (Path): Directory where log file will be saved.
+    """
+    log_formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+
+    # Console handler
+    console_handler = logging.StreamHandler()
+    console_handler.setFormatter(log_formatter)
+
+    # File handler
+    file_handler = logging.FileHandler(log_file, mode="w", encoding="utf-8")
+    file_handler.setFormatter(log_formatter)
+
+    # Root logger config
+    root_logger = logging.getLogger()
+    root_logger.setLevel(logging.INFO)
+    root_logger.addHandler(console_handler)
+    root_logger.addHandler(file_handler)
+
+
+def load_yaml(file_path: str) -> dict:
+    """
+    Load a YAML file from the given path and return its contents as a dictionary.
+    """
+    with open(file_path, "r", encoding="utf-8") as f:
         data = yaml.safe_load(f)
     return data
 
 
-def save_config(config: dict, file_path: str) -> None:
-    with open(file_path, "w") as f:
-        yaml.safe_dump(config, f, default_flow_style=False, sort_keys=False)
-
-
-def create_dir(directory_path: str) -> None:
-    os.makedirs(directory_path)
-
-
-def remove_dir(directory_path: str) -> None:
-    os.rmdir(directory_path)
-
-
-def join_paths(*paths: str) -> str:
-    return os.path.join(*paths)
+def save_yaml(data: dict, file_path: str) -> None:
+    """
+    Save a dictionary as a YAML file to the specified path.
+    Uses block style and preserves key order.
+    """
+    with open(file_path, "w", encoding="utf-8") as f:
+        yaml.safe_dump(data, f, default_flow_style=False, sort_keys=False)
 
 
 def convert_class_name_to_module_name(class_name: str) -> str:
+    """
+    Convert a CamelCase class name to a snake_case module name.
+    Example: "ImagePreprocessor" -> "image_preprocessor"
+    """
     module_name = re.sub(r"(?<!^)(?=[A-Z])", "_", class_name).lower()
     return module_name
 
 
 def convert_module_name_to_class_name(module_name: str) -> str:
+    """
+    Convert a snake_case module name to a CamelCase class name.
+    Example: "image_preprocessor" -> "ImagePreprocessor"
+    """
     class_name = module_name.title().replace("_", "")
     return class_name
 
 
 def combine_parameters(global_parameters: dict, node_parameters: dict) -> dict:
+    """
+    Merge two dictionaries, giving precedence to node_parameters.
+    Parameters from global_parameters are added only if missing in node_parameters.
+    """
     # If either dictionary is empty, return the other one
     if not global_parameters:
-        return node_parameters
+        return node_parameters if node_parameters else {}
     if not node_parameters:
-        return global_parameters
+        return global_parameters if global_parameters else {}
 
-    # If both dictionaries have entries, combine them
+    # Combine dictionaries, preferring node_parameters
     combined_parameters = node_parameters.copy()
     for parameter, value in global_parameters.items():
         if parameter not in combined_parameters:
             combined_parameters[parameter] = value
     return combined_parameters
-
-
-def is_extension(directory_path: str) -> bool:
-    return os.path.exists(directory_path)
-
-
-def get_workflows_to_run(workflows_old, workflows_new):
-    workflows_to_run = {}
-
-    # Add modified workflows
-    for i in range(len(workflows_old)):
-        num_nodes_1 = len(workflows_old[i]["nodes"])
-        num_nodes_2 = len(workflows_new[i]["nodes"])
-
-        if num_nodes_1 < num_nodes_2:
-            workflows_to_run[workflows_old[i]["name"]] = num_nodes_1
-
-    # Add new workflows
-    for i in range(len(workflows_old), len(workflows_new)):
-        workflows_to_run[workflows_new[i]["name"]] = 0
-
-    return workflows_to_run
-    return workflows_to_run

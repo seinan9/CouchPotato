@@ -1,5 +1,6 @@
+from pathlib import Path
+
 from couch_potato.core.node import Node
-from couch_potato.core.utils import create_dir, join_paths
 from couch_potato.task.utils import list_files, load_image, load_targets, save_image
 from PIL import Image
 from tqdm import tqdm
@@ -33,8 +34,8 @@ class ImagePreprocessor(Node):
         width: int,
         height: int,
     ) -> None:
-        self.input_dir = input_dir
-        self.output_dir = output_dir
+        self.input_dir = Path(input_dir)
+        self.output_dir = Path(output_dir)
         self.targets = targets if isinstance(targets, dict) else load_targets(targets)
         self.width = width
         self.height = height
@@ -42,15 +43,14 @@ class ImagePreprocessor(Node):
     def run(self) -> None:
         # Loop over each compound and process its images
         for compound in tqdm(self.targets.keys(), desc="Preprocessing images"):
-            compound_input_dir = join_paths(self.input_dir, compound)
-            compound_output_dir = join_paths(self.output_dir, compound)
-            create_dir(compound_output_dir)
+            compound_input_dir = self.input_dir / compound
+            compound_output_dir = self.output_dir / compound
+            compound_output_dir.mkdir(parents=True)
             file_names = list_files(compound_input_dir, True)
 
             for file_name in file_names:
-                file_input_path = join_paths(compound_input_dir, file_name)
-                file_output_name = f'{file_name.split(".")[0]}.png'
-                file_output_path = join_paths(compound_output_dir, file_output_name)
+                file_input_path = compound_input_dir / file_name
+                file_output_path = compound_output_dir / f"{file_name.split(".")[0]}.png"
 
                 image = load_image(file_input_path)
                 image = image.convert("RGB")

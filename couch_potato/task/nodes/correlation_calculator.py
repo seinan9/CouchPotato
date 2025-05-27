@@ -1,5 +1,6 @@
+from pathlib import Path
+
 from couch_potato.core.node import Node
-from couch_potato.core.utils import create_dir, join_paths
 from couch_potato.task.utils import load_csv, save_csv
 from scipy.stats import spearmanr
 
@@ -56,8 +57,8 @@ class CorrelationCalculator(Node):
             )
         )
 
-        self.output_dir = output_dir
-        create_dir(output_dir)
+        self.output_dir = Path(output_dir)
+        self.output_dir.mkdir(parents=True)
 
         # Resolve the correlation method (e.g., spearman)
         try:
@@ -75,7 +76,7 @@ class CorrelationCalculator(Node):
             correlations[f"corr_{i+1}"] = correlation
 
         # Save results to a CSV file
-        output_file = join_paths(self.output_dir, "correlations.csv")
+        output_file = self.output_dir / "correlations.csv"
         save_csv(list(correlations.keys()), [correlations], output_file)
 
     def spearman(self, values_0: list, values_1: list) -> float:

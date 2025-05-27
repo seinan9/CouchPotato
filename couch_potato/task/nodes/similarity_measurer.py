@@ -1,6 +1,7 @@
+from pathlib import Path
+
 import torch
 from couch_potato.core.node import Node
-from couch_potato.core.utils import create_dir, join_paths
 from couch_potato.task.utils import load_targets, load_vector, save_csv
 
 
@@ -32,31 +33,29 @@ class SimilarityMeasurer(Node):
         measure: str,
         dim: int,
     ):
-        self.input_dir = input_dir
-        self.output_dir = output_dir
+        self.input_dir = Path(input_dir)
+        self.output_dir = Path(output_dir)
         self.targets = targets if isinstance(targets, dict) else load_targets(targets)
         self.measure = getattr(self, measure)
         self.dim = dim
 
     def run(self):
         for compound, constituents in self.targets.items():
-            compound_input_dir = join_paths(self.input_dir, compound)
-            compound_input_file = join_paths(compound_input_dir, f"{compound}.pt")
+            compound_input_dir = self.input_dir / compound
+            compound_input_file = compound_input_dir / f"{compound}.pt"
             compound_vector = load_vector(compound_input_file)
             similarities = {}
 
             for constituent in constituents:
-                constituent_input_file = join_paths(
-                    compound_input_dir, f"{constituent}.pt"
-                )
+                constituent_input_file = compound_input_dir / f"{constituent}.pt"
                 constituent_vector = load_vector(constituent_input_file)
                 similarities[constituent] = round(
                     self.measure(compound_vector, constituent_vector, self.dim), 3
                 )
 
-            compound_output_dir = join_paths(self.output_dir, compound)
-            compound_output_file = join_paths(compound_output_dir, "similarities.csv")
-            create_dir(compound_output_dir)
+            compound_output_dir = self.output_dir / compound
+            compound_output_file = compound_output_dir / "similarities.csv"
+            compound_output_dir.mkdir(parents=True)
 
             csv_header = ["compound", "sim_const_1", "sim_const_2"]
             csv_values = [

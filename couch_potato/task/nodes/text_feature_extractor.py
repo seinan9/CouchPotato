@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
+from pathlib import Path
 
 import fasttext
 import spacy
 import torch
 from couch_potato.core.node import Node
-from couch_potato.core.utils import create_dir, join_paths
 from couch_potato.task.utils import load_targets, save_vector
 from gensim.models import Word2Vec as w2v
 from huggingface_hub import hf_hub_download
@@ -29,24 +29,23 @@ class TextFeatureExtractor(Node):
         model_id: str,
         model_path: str = None,
     ) -> None:
-        self.output_dir = output_dir
+        self.output_dir = Path(output_dir)
         self.targets = targets if isinstance(targets, dict) else load_targets(targets)
         self.separator = "" if separator is None else separator
         self.model: TextToVectorModel = globals()[model_id](model_path)
 
     def run(self) -> None:
         for compound, constituents in self.targets.items():
-            compound_output_dir = join_paths(self.output_dir, compound)
-            create_dir(compound_output_dir)
+            compound_output_dir = self.output_dir / compound
+            compound_output_dir.mkdir(parents=True)
 
             for target in [
                 constituents[0] + self.separator + constituents[1]
             ] + constituents:
                 if target == constituents[0] + self.separator + constituents[1]:
-                    print(target)
-                    file_output_path = join_paths(compound_output_dir, f"{compound}.pt")
+                    file_output_path = compound_output_dir / f"{compound}.pt"
                 else:
-                    file_output_path = join_paths(compound_output_dir, f"{target}.pt")
+                    file_output_path = compound_output_dir / f"{target}.pt"
                 vector = self.model.extract_vector(target)
 
                 save_vector(vector, file_output_path)

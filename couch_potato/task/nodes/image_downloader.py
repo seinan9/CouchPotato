@@ -1,8 +1,7 @@
-import logging
+from pathlib import Path
 
 from bing_image_downloader import downloader
 from couch_potato.core.node import Node
-from couch_potato.core.utils import create_dir, join_paths, remove_dir
 from couch_potato.task.utils import list_files, load_targets, move_file
 from tqdm import tqdm
 
@@ -23,14 +22,12 @@ class ImageDownloader(Node):
     PARAMETERS = {"output_dir": str, "targets": dict | str, "num_images": int}
 
     def __init__(self, output_dir: str, targets: dict | str, num_images: int) -> None:
-        self.output_dir = output_dir
+        self.output_dir = Path(output_dir)
         self.targets = targets if isinstance(targets, dict) else load_targets(targets)
         self.num_images = num_images
 
     def run(self) -> None:
-        tmp_dir = join_paths(
-            self.output_dir, "tmp"
-        )  # Temporary directory for raw downloads
+        tmp_dir = self.output_dir / "tmp"  # Temporary directory for raw downloads
 
         for compound, constituents in tqdm(
             self.targets.items(), desc="Downloading images for targets"
@@ -51,25 +48,25 @@ class ImageDownloader(Node):
                 )
 
             # Create a directory for the current compound
-            compound_output_dir = join_paths(self.output_dir, compound)
-            create_dir(compound_output_dir)
+            compound_output_dir = self.output_dir / compound
+            compound_output_dir.mkdir(parents=True)
 
             # Move and rename each downloaded image into the compound's directory
             for word in words:
-                word_dir = join_paths(tmp_dir, word)
+                word_dir = tmp_dir / word
                 files = list_files(word_dir, True)
 
                 for file in files:
                     file_number = file.split("_")[1].split(".")[0]
                     file_extension = file.split(".")[1]
-                    file_input_path = join_paths(word_dir, file)
-                    file_output_path = join_paths(
-                        compound_output_dir, f"{word}_{file_number}.{file_extension}"
+                    file_input_path = word_dir / file
+                    file_output_path = (
+                        compound_output_dir / f"{word}_{file_number}.{file_extension}"
                     )
                     move_file(file_input_path, file_output_path)
 
                 # Clean up temporary word directory
-                remove_dir(word_dir)
+                word_dir.rmdir()
 
         # Clean up the overall temp directory
-        remove_dir(tmp_dir)
+        tmp_dir.rmdir()

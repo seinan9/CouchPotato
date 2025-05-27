@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
+from pathlib import Path
 
 import diffusers
 import torch
 from couch_potato.core.node import Node
-from couch_potato.core.utils import create_dir, join_paths
 from couch_potato.task.utils import load_sentences, load_targets, save_image
 from diffusers import PixArtSigmaPipeline, StableDiffusionXLPipeline, Transformer2DModel
 from PIL.Image import Image
@@ -36,7 +36,7 @@ class ImageGenerator(Node):
         steps: int,
         cfg: float,
     ) -> None:
-        self.output_dir = output_dir
+        self.output_dir = Path(output_dir)
         self.targets = targets if isinstance(targets, dict) else load_targets(targets)
         self.prompts_dir = None if prompts_dir in ("", "empty", None) else prompts_dir
         self.seed = seed
@@ -49,8 +49,8 @@ class ImageGenerator(Node):
         for compound, constituents in tqdm(
             self.targets.items(), desc="Generating images for targets"
         ):
-            compound_output_dir = join_paths(self.output_dir, compound)
-            create_dir(compound_output_dir)
+            compound_output_dir = self.output_dir / compound
+            compound_output_dir.mkdir(parents=True)
 
             for word in [compound] + constituents:
                 if self.prompts_dir:
@@ -59,7 +59,7 @@ class ImageGenerator(Node):
                         if word == compound
                         else word
                     )
-                    prompt_path = join_paths(self.prompts_dir, file_name)
+                    prompt_path = self.prompts_dir / file_name
                     prompts = load_sentences(prompt_path)
                     used_prompts = prompts[: self.num_images]
                 else:
@@ -72,7 +72,7 @@ class ImageGenerator(Node):
                         steps=self.steps,
                         cfg=self.cfg,
                     )
-                    out_path = join_paths(compound_output_dir, f"{word}_{i+1}.png")
+                    out_path = compound_output_dir / f"{word}_{i+1}.png"
                     save_image(image, out_path)
 
 

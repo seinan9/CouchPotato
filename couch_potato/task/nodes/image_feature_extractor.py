@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
+from pathlib import Path
 
 import torch
 import torchvision
 from couch_potato.core.node import Node
-from couch_potato.core.utils import create_dir, join_paths
 from couch_potato.task.utils import list_files, load_image, load_targets, save_vector
 from PIL.Image import Image
 from tqdm import tqdm
@@ -40,8 +40,8 @@ class ImageFeatureExtractor(Node):
         cuda_id: int,
         model_name: str,
     ) -> None:
-        self.input_dir = input_dir
-        self.output_dir = output_dir
+        self.input_dir = Path(input_dir)
+        self.output_dir = Path(output_dir)
         self.targets = targets if isinstance(targets, dict) else load_targets(targets)
         self.model = create_model(model_name, cuda_id)
 
@@ -51,14 +51,14 @@ class ImageFeatureExtractor(Node):
             self.targets.keys(), desc="Extracting features for targets"
         ):
 
-            compound_input_dir = join_paths(self.input_dir, compound)
-            compound_output_dir = join_paths(self.output_dir, compound)
-            create_dir(compound_output_dir)
+            compound_input_dir = self.input_dir / compound
+            compound_output_dir = self.output_dir / compound
+            compound_output_dir.mkdir(parents=True)
 
             file_names = list_files(compound_input_dir, False)
             for file_name in file_names:
-                file_input_path = join_paths(compound_input_dir, f"{file_name}.png")
-                file_output_path = join_paths(compound_output_dir, f"{file_name}.pt")
+                file_input_path = compound_input_dir / f"{file_name}.png"
+                file_output_path = compound_output_dir / f"{file_name}.pt"
 
                 image = load_image(file_input_path)
                 vector = self.model.extract_vector(image)
