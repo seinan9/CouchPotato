@@ -7,7 +7,6 @@ from couch_potato.core.node import Node
 from couch_potato.core.utils import create_dir, join_paths
 from couch_potato.task.utils import load_sentences, load_targets, save_image
 from diffusers import PixArtSigmaPipeline, StableDiffusionXLPipeline, Transformer2DModel
-from diffusers.pipelines.auto_pipeline import AutoPipelineForText2Image
 from PIL.Image import Image
 
 
@@ -20,8 +19,7 @@ class AdvancedImageGenerator(Node):
         "seed": int,
         "cuda_id": int,
         "num_images": int,
-        "model_type": str,
-        "model_path": str,
+        "model_name": str,
         "steps": int,
         "cfg": float,
     }
@@ -34,8 +32,7 @@ class AdvancedImageGenerator(Node):
         seed: int,
         cuda_id: int,
         num_images: int,
-        model_type: str,
-        model_path: str,
+        model_name: str,
         steps: int,
         cfg: float,
     ) -> None:
@@ -47,7 +44,7 @@ class AdvancedImageGenerator(Node):
         self.num_images = num_images
         self.steps = steps
         self.cfg = cfg
-        self.model: TextToImageModel = globals()[model_type](model_path, cuda_id)
+        self.model: TextToImageModel = create_model(model_name, cuda_id)
 
     def run(self) -> None:
         progress = 0
@@ -89,10 +86,11 @@ class TextToImageModel(ABC):
 
 class StableDiffusionXL(TextToImageModel):
 
-    def __init__(self, model_path: str, cuda_id: str) -> None:
+    def __init__(self, pretrained_model_name_or_path: str, cuda_id: str) -> None:
         diffusers.utils.logging.disable_progress_bar()
-        self.pipe = StableDiffusionXLPipeline.from_single_file(
-            pretrained_model_link_or_path=model_path,
+
+        self.pipe = StableDiffusionXLPipeline.from_pretrained(
+            pretrained_model_name_or_path,
             torch_dtype=torch.float16,
             use_safetensors=True,
         )
@@ -114,7 +112,7 @@ class StableDiffusionXL(TextToImageModel):
 
 class PixArtSigma(TextToImageModel):
 
-    def __init__(self, model_path: str, cuda_id: str) -> None:
+    def __init__(self, cuda_id: str) -> None:
         transformer = Transformer2DModel.from_pretrained(
             pretrained_model_name_or_path="PixArt-alpha/PixArt-Sigma-XL-2-1024-MS",
             subfolder="transformer",
@@ -142,3 +140,14 @@ class PixArtSigma(TextToImageModel):
                 width=1024,
                 height=1024,
             ).images[0]
+
+
+def create_model(model_name: str, cuda_id: str) -> TextToImageModel:
+    if model_name == "sdxl-base":
+        return StableDiffusionXL("stabilityai/stable-diffusion-xl-base-1.0", cuda_id)
+    elif model_name == "sdxl-juggernaut":
+        return StableDiffusionXL("RunDiffusion/Juggernaut-X-v10", cuda_id)
+    elif model_name == "pixart-sigma":
+        return PixArtSigma(cuda_id)
+    else:
+        raise ValueError(f"Unknown model name: {model_name}")
