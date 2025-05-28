@@ -1,0 +1,19 @@
+nodes:
+- name: prediction_combiner
+  parameters:
+    input_file_0: data/skipgram_predictions.csv
+    input_file_1: data/pixart_scenario_predictions.csv
+    weight: 0.7
+    output_dir: ${this}
+- name: correlation_calculator
+  parameters:
+    input_file_0: ${prev}/weighted.csv
+    input_file_1: data/gold.csv
+    columns_0:
+    - 1
+    - 2
+    columns_1:
+    - 1
+    - 3
+    output_dir: ${this}
+    measure: spearman
