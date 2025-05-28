@@ -1,7 +1,7 @@
 nodes:
 - name: correlation_calculator
   parameters:
-    input_file_0: data/skipgram_predictions.csv
+    input_file_0: data/predictions/skipgram_predictions.csv
     input_file_1: data/gold.csv
     columns_0:
     - 1
