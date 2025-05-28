@@ -1,19 +1,24 @@
-# Image Compositionality
+# Couch Potato
 
-## Setup
+This repository contains the code and data used for the ACL 2025 paper: "*A Couch Potato is not a Potato on a Couch: Visual Compositionality Prediction using Prompting Strategies and Image Generation for Adequate Image Retrieval*".
 
-1.  Clone the repository:
+## Installation
 
-        git clone https://github.com/seinan9/ImageCompositionality.git
+1. **Clone the repository:**
 
-    and navigate into the cloned directory:
-
+        git clone https://github.com/seinan9/CouchPotato.git
         cd ImageCompositionality
-
-2.  Create a virtual environment:
+   
+2. (Optional) **Create and activate a virtual environment:**
 
         python -m venv ./venv
+        source .venv/bin/activate
 
-3.  Install the required packages:
+    
+4. **Install the dependencies:**
 
-        python -m pip install requirements.txt
+        pip install -r requirements.txt
+
+5. **Set your HuggingFace token** (required for some models):
+
+        export HF_TOKEN=your_token_here
