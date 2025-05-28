@@ -1,4 +1,5 @@
 import argparse
+import logging
 from pathlib import Path
 
 from couch_potato.core.engine import Engine
@@ -23,11 +24,19 @@ if __name__ == "__main__":
     # Setup logger
     setup_logging(output_dir / "workflow.log")
 
+    # Check if this is potentially a rerun or extension
+    workflow_output_file = output_dir / "workflow.yaml"
+    if workflow_output_file.exists():
+        logging.info(
+            "Detected existing workflow.yaml in output directory. "
+            "This run may be a continuation, rerun, or extension of a previous run."
+        )
+
     # Load workflow
     workflow = load_yaml(args.file)
 
     # Save workflow in output directory
-    save_yaml(workflow, output_dir / "workflow.yaml")
+    save_yaml(workflow, workflow_output_file)
 
     # Run the workflow engine
     engine = Engine(workflow, output_dir)

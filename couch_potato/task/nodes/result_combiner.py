@@ -29,7 +29,7 @@ class ResultCombiner(Node):
         self.output_dir = Path(output_dir)
         self.targets = targets if isinstance(targets, dict) else load_targets(targets)
         self.file_name = file_name
-        self.output_dir.mkdir(parents=True)
+        self.output_dir.mkdir(exist_ok=True)
 
     def run(self):
         data = []

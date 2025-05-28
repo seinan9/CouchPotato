@@ -1,5 +1,6 @@
 import importlib
 import logging
+import shutil
 import time
 from pathlib import Path
 
@@ -66,6 +67,7 @@ class Engine:
         artifacts_dir.mkdir(exist_ok=True)
 
         previous_node_dir = None
+        resume_from_here = False
 
         for index, node in enumerate(self.nodes, start=1):
             node_name = node["name"]
@@ -73,6 +75,40 @@ class Engine:
 
             # Directory to store all node-specific outputs/artifacts
             node_dir = artifacts_dir / f"{index}_{node_name}"
+            flag_file = node_dir / "in_progress.flag"
+
+            # If resuming from an invalidated node, clear all following
+            if resume_from_here:
+                if node_dir.exists():
+                    logging.info(
+                        "[%d/%d] Invalidating node: %s. Downstream of failed node. Clearing artifacts.",
+                        index,
+                        len(self.nodes),
+                        node_name,
+                    )
+                    shutil.rmtree(node_dir, ignore_errors=True)
+
+            # Handle rerun logic for current node
+            if flag_file.exists():
+                logging.info(
+                    "[%d/%d] Detected incomplete execution for node: %s. Clearing directory for rerun",
+                    index,
+                    len(self.nodes),
+                    node_name,
+                )
+                shutil.rmtree(node_dir, ignore_errors=True)
+                node_dir.mkdir(parents=True, exist_ok=True)
+                resume_from_here = True  # Invalidate downstream nodes
+
+            elif node_dir.exists():
+                logging.info(
+                    "[%d/%d] Skipping node: %s. Previously executed successfully (marker file missing, assuming valid artifacts)",
+                    index,
+                    len(self.nodes),
+                    node_name,
+                )
+                previous_node_dir = node_dir
+                continue
 
             # Dynamically import the node's class from the task.nodes package
             module = importlib.import_module(f"task.nodes.{node_name}")
@@ -115,26 +151,33 @@ class Engine:
                 key: available_parameters[key] for key in required_parameters.keys()
             }
 
+            # Create node directory and flag
+            node_dir.mkdir(exist_ok=True)
+            flag_file.touch()
+
             # Instantiate and run the node
-            progress = f"[{index}/{len(self.nodes)}]"
-            logging.info("%s Executing node: %s", progress, node_name)
+            logging.info(
+                "[%d/%d] Executing node: %s", index, len(self.nodes), node_name
+            )
 
             node_start_time = time.time()
             node_instance = node_class(**parameters)
             node_instance.run()
 
-            # Update for next node
+            # Mark as complete
+            flag_file.unlink()
+
             previous_node_dir = node_dir
 
             node_execution_time = time.time() - node_start_time
             logging.info(
-                "%s Executed node: %s in %.2fs",
-                progress,
+                "[%d/%d] Executed node: %s in %.2fs",
+                index,
+                len(self.nodes),
                 node_name,
                 node_execution_time,
             )
 
-        # workflow_execution_time = round(time.time() - workflow_start_time, 2)
         workflow_execution_time = time.time() - workflow_start_time
         logging.info(
             "Executed workflow in %.2fs",
