@@ -38,7 +38,9 @@ class ImageGenerator(Node):
     ) -> None:
         self.output_dir = Path(output_dir)
         self.targets = targets if isinstance(targets, dict) else load_targets(targets)
-        self.prompts_dir = None if prompts_dir in ("", "empty", None) else prompts_dir
+        self.prompts_dir = (
+            None if prompts_dir in ("", "empty", None) else Path(prompts_dir)
+        )
         self.seed = seed
         self.num_images = num_images
         self.steps = steps
