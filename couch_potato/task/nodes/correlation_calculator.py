@@ -58,7 +58,7 @@ class CorrelationCalculator(Node):
         )
 
         self.output_dir = Path(output_dir)
-        self.output_dir.mkdir(parents=True)
+        self.output_dir.mkdir(exist_ok=True)
 
         # Resolve the correlation method (e.g., spearman)
         try:

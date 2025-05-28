@@ -1,5 +1,7 @@
 import logging
 import re
+from pathlib import Path
+from typing import Any
 
 import yaml
 
@@ -81,3 +83,53 @@ def combine_parameters(global_parameters: dict, node_parameters: dict) -> dict:
         if parameter not in combined_parameters:
             combined_parameters[parameter] = value
     return combined_parameters
+
+
+def resolve_placeholders(
+    params: dict[str, Any], current_index: int, node_dirs: dict[int, Path]
+) -> dict[str, Any]:
+    """
+    Recursively resolve placeholder strings in parameters.
+
+    Supported placeholders:
+    - ${this}       : Path to the current node directory
+    - ${prev}       : Path to the previous node directory
+    - ${node:<idx>} : Path to the <idx>-th node directory
+
+    Args:
+        params (dict): Dictionary of parameters
+        current_index (int): Index of the current node (1-based)
+        node_dirs (dict[int, Path]): Mapping from node index to its Path
+
+    Returns:
+        dict: Parameters with placeholders resolved
+    """
+
+    def _resolve(value):
+        if isinstance(value, str):
+            # ${this}
+            if "${this}" in value:
+                value = value.replace("${this}", str(node_dirs.get(current_index, "")))
+            # ${prev}
+            if "${prev}" in value:
+                value = value.replace(
+                    "${prev}", str(node_dirs.get(current_index - 1, ""))
+                )
+
+            # ${node:<idx>}
+            def replace_node(match):
+                node_idx = int(match.group(1))
+                if node_idx not in node_dirs:
+                    raise ValueError(
+                        f"Placeholder references undefined node index: {node_idx}"
+                    )
+                return str(node_dirs[node_idx])
+
+            value = re.sub(r"\$\{node:(\d+)\}", replace_node, value)
+        elif isinstance(value, dict):
+            value = {k: _resolve(v) for k, v in value.items()}
+        elif isinstance(value, list):
+            value = [_resolve(v) for v in value]
+        return value
+
+    return {k: _resolve(v) for k, v in params.items()}

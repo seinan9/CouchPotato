@@ -7,6 +7,7 @@ from pathlib import Path
 from couch_potato.core.utils import (
     combine_parameters,
     convert_module_name_to_class_name,
+    resolve_placeholders,
 )
 
 
@@ -66,8 +67,8 @@ class Engine:
         artifacts_dir = self.output_dir / "artifacts"
         artifacts_dir.mkdir(exist_ok=True)
 
-        previous_node_dir = None
         resume_from_here = False
+        all_nodes_dirs = {}
 
         for index, node in enumerate(self.nodes, start=1):
             node_name = node["name"]
@@ -75,6 +76,7 @@ class Engine:
 
             # Directory to store all node-specific outputs/artifacts
             node_dir = artifacts_dir / f"{index}_{node_name}"
+            all_nodes_dirs[index] = node_dir
             flag_file = node_dir / "in_progress.flag"
 
             # If resuming from an invalidated node, clear all following
@@ -107,7 +109,6 @@ class Engine:
                     len(self.nodes),
                     node_name,
                 )
-                previous_node_dir = node_dir
                 continue
 
             # Dynamically import the node's class from the task.nodes package
@@ -119,21 +120,12 @@ class Engine:
             available_parameters = combine_parameters(
                 self.global_parameters, specified_parameters
             )
+            available_parameters = resolve_placeholders(
+                available_parameters, index, all_nodes_dirs
+            )
 
             # Get the set of parameters the node class requires
             required_parameters = node_class.PARAMETERS
-
-            # Assign default input_dir and output_dir if missing but required
-            default_parameters = [
-                ("input_dir", previous_node_dir),
-                ("output_dir", node_dir),
-            ]
-            for param_name, default_value in default_parameters:
-                if (
-                    param_name in required_parameters
-                    and param_name not in available_parameters
-                ):
-                    available_parameters[param_name] = default_value
 
             # Validate all required parameters are provided
             missing_parameters = [
@@ -166,8 +158,6 @@ class Engine:
 
             # Mark as complete
             flag_file.unlink()
-
-            previous_node_dir = node_dir
 
             node_execution_time = time.time() - node_start_time
             logging.info(
