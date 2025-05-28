@@ -16,7 +16,7 @@ Below is an overview of the data in this repository.
 
 ### Targets
 
-We use 88 out of the 90 compound nouns, along with their corresponding gold-standard compositionality ratings, originally provided by [Reddy et al.](https://aclanthology.org/I11-1024.pdf). These are stored in:
+We use 88 out of the 90 compound nouns, along with their corresponding gold-standard compositionality ratings, originally provided by [Reddy et al.](https://aclanthology.org/I11-1024/). These are stored in:
 
 - `data/targets.yaml`: The 88 target compounds.
 - `data/gold.csv`: Human compositionality ratings.
@@ -63,14 +63,72 @@ The file `data/concreteness_annotations.csv` includes human-annotated concretene
 
 ## Usage
 
-CouchPotato uses a modular **workflow system** defined via YAML files. Each workflow consists of a series of **nodes** (small reusable components) that are executed sequentially.
+CouchPotato uses a modular **workflow system** based on YAML files. Each workflow defines a series of **nodes** (self-contained components) that are executed sequentially.
 
-- How does it work.
-- How to use the existing nodes.
-- How to create workflows.
-- YAML variables.
-- How to create new nodes.
-- Example.
+### How it Works
+
+At the core is the `engine`, which loads a workflow, resolves variables, and runs each node step by step. Each **node** performs a single task (e.g., generating images, extracting features, computing correlations). You define nodes and their parameters in a YAML file, and then run the workflow via:
+
+```bash
+python couch_potato/main.py --workflow workflows/example.yaml --output_dir output/example
+```
+
+This command:
+
+- Loads the workflow from workflows/example.yaml
+- Creates the output structure under output/example
+- Copies the workflow YAML into the output directory for reproducibility
+- Runs (and logs) all nodes in the specified order
+- Stores any artifacts in designated subdirectories
+
+### Using Existing Nodes
+
+The *couch_potato/task/nodes* directory contains all nodes used for the experiments in our paper. Each node is a Python class that inherits from Node (*couch_potato/core/node.py) and defines:
+
+- A PARAMETERS dictionary specifying required inputs
+- An __init__() method that handles these inputs
+- A run() method that implements the nodes behavior
+
+### Creating a Workflow
+
+A workflow is a YAML file consisting of:
+
+- Optional *global_parameters* shared across nodes
+- A list of nodes with name and parameters
+
+Each node corresponds to a Python module in task/nodes/, and its class name is derived from the module name.
+
+Example:
+
+TODO
+
+The name must match the module in task.nodes, and the parameters must match the class’s PARAMETERS.
+
+### YAML Variables
+
+To simplify file path and directory references, you can use the following YAML variables:
+
+|Variable|Description|
+|---|---|
+|`${this}`|The output directory of the current node|
+|`${prev}`|The output directory of the previous node|
+|`${node:<index>}`|The output directory of the specified node (e.g. `${node:3}`)|
+
+These variables are automatically resolved by the engine.
+
+Example:
+
+### Creating New Nodes
+
+To add a new node:
+1. Create a new Python file in couch_potato/task/nodes/, e.g. my_node.py
+2. Inherit from Node and define the required parameters and behavior:
+
+TODO: Example
+
+3. Reference it in a workflow:
+
+TODO: Example
 
 ### Example Node and Workflow
 
