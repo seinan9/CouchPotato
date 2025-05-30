@@ -1,7 +1,7 @@
 from couch_potato.core.node import Node
 
 
-class ExampleNode(Node):
+class Print(Node):
 
     PARAMETERS = {"message": str}
 

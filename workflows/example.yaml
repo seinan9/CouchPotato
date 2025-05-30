@@ -1,7 +1,4 @@
-root_output_dir: workflow_example
-workflows:
-- name: workflow_0
-  nodes:
-  - name: example_node
-    parameters:
-      message: "Hello World!"
+nodes:
+- name: print
+  parameters:
+    message: "Hello World!"
