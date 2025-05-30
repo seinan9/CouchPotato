@@ -1,5 +1,7 @@
 # Couch Potato
 
+THIS IS WORK IN PROGRESS!
+
 This repository contains the code and data used for the ACL 2025 paper: "*A Couch Potato is not a Potato on a Couch: Visual Compositionality Prediction using Prompting Strategies and Image Generation for Adequate Image Retrieval*".
 
 **Table of Contents**
@@ -42,85 +44,94 @@ The file `data/concreteness/annotations.csv` includes human-annotated concretene
 ## Installation
 
 1. **Clone the repository:**
-   
-        git clone https://github.com/seinan9/CouchPotato.git
-        cd ImageCompositionality
-
+```bash   
+git clone https://github.com/seinan9/CouchPotato.git
+cd ImageCompositionality
+```
 2. (Optional) **Create and activate a virtual environment:**
-
-        python -m venv ./venv
-        source .venv/bin/activate
-
+```bash
+python3 -m venv ./venv
+source .venv/bin/activate
+```
 3. **Install the dependencies:**
-
-        pip install -r requirements.txt
-
+```bash
+pip install -r requirements.txt
+```
 4. **Set your HuggingFace token** (required for some models):
-
-        export HF_TOKEN=your_token_here
+```bash
+export HF_TOKEN=your_token_here
+```
 
 ## Reproducing Results from the Paper
 
-For easy reproducibility we provide YAML workflows. In order to reproduce a result, select the corresponding workflow YAML file and pass it to the main module.
+For easy reproducibility we provide a set of YAML workflows. Each workflow defines all necessary steps to run a specific experiment or analysis.
+
+You can execute any workflow using the following command:
 ```bash
-python3 couch_potato/main.py -w workflows/example_workflow.yaml -o path/to/desired/output_dir
+python3 couch_potato/main.py --workflow workflows/workflow.yaml --output_dir path/to/output_dir
 ```
 
 ### Example
 To reproduce **PixArt + Scenario** from Table 1:
 ```bash
-python couch_potato/main.py --workflow workflows/pixart_scenario.yaml --output_dir output/pixart_scenario
+python3 couch_potato/main.py --workflow workflows/from_scratch/pixart-sigma_scenario.yaml --output_dir output/pixart_scenario
 ```
-The modifier and head correlation can then be found under output/pixart_scenario/artifacts/7_correlation_calculator/similarities.csv
+The modifier and head correlation scores will be saved at:
+```
+output/pixart_scenario/artifacts/7_correlate/similarities.csv
+```
 
-We provide two options:
-1. Starting from the predictions: Very fast, in most cases this only correlates the predictions to the gold data.
-2. Starting from Scratch: Very slow, this does all the steps from start to finish (downloading/generating images, feature extraction and so on)
+### Options for Reproduction
+
+We provide two types of workflows:
+
+1. **From Predictions**: Fast. These workflows assume model predictions are already available and typically only perform correlation against gold-standard labels.
+2. **From Scratch**: Slow. These workflows reproduce the full pipeline, including resource intensive steps such as image generation.
 
 ### Table 1
 
-| Table | Results | Workflow File | Workflow File (full) |
+| Results | Workflow (From Predictions) | Workflow (From Scratch) |
 |---|---|---|
-| 1 | Bing | `workflows/bing.yaml`|
-| 1 | PixArt + Word | `workflows/pixart-sigma_word.yaml` |
-| 1 | PixArt + Sentence | `workflows/pixart-sigma_sentence.yaml` |
-| 1 | PixArt + Definition | `workflows/pixart-sigma_definition.yaml` |
-| 1 | PixArt + Scenario | `workflows/pixart-sigma_scenario.yaml` |
-| 1 | Skip-gram (T) | `workflows/skip-gram.yaml` |
-| 1 | Combined (T + V) | `workflows/combined.yaml` |
-| 1 | ChatGPT (direct) | `workflows/chat-gpt.yaml` |
+| Bing | `workflows/bing.yaml`| TBD |
+| PixArt + Word | `workflows/from_predictions/pixart-sigma_word.yaml` | TBD |
+| PixArt + Sentence | `workflows/from_predictions/pixart-sigma_sentence.yaml` | TBD |
+| PixArt + Definition | `workflows/from_predictions/pixart-sigma_definition.yaml` | TBD |
+| PixArt + Scenario | `workflows/from_predictions/pixart-sigma_scenario.yaml` | TBD |
+| Skip-gram (T) | `workflows/from_predictions/skip-gram.yaml` | TBD |
+| Combined (T + V) | `workflows/from_predictions/combined.yaml` | TBD |
+| ChatGPT (direct) | `workflows/from_predictions/chat-gpt.yaml` | TBD |
 
 
 ### Table 2
 
-| Table | Results | Workflow File |
+| Results | Workflow (From Predictions) | Workflow (From Scratch) |
 |---|---|---|
-| 2 | Concrete: PixArt + Scenario | `workflows/concrete_pixart-sigma_scenario.yaml`|
-| 2 | Abstract: PixArt + Scenario | `workflows/abstract_pixart-sigma_scenario.yaml`|
-| 2 | Concrete: Skip-gram | `workflows/concrete_skip-gram.yaml`|
-| 2 | Abstract: Skip-gram | `workflows/abstract_skip-gram.yaml`|
+| Concrete: PixArt + Scenario | `workflows/from_predictions/concrete_pixart-sigma_scenario.yaml`| TBD |
+| Abstract: PixArt + Scenario | `workflows/from_predictions/abstract_pixart-sigma_scenario.yaml`| TBD |
+| Concrete: Skip-gram | `workflows/from_predictions/concrete_skip-gram.yaml`| TBD |
+| Abstract: Skip-gram | `workflows/from_predictions/abstract_skip-gram.yaml`| TBD |
 
 ### Table 3
 
-| Table | Results | Workflow File |
+| Results | Workflow (From Predictions) | Workflow (From Scratch) |
 |---|---|---|
-| 3 | SDXLBase + Word | `workflows/sdxl-base_word.yaml` |
-| 3 | SDXLBase + Sentence | `workflows/sdxl-base_sentence.yaml` |
-| 3 | SDXLBase + Definition | `workflows/sdxl-base_definition.yaml` |
-| 3 | SDXLBase + Scenario | `workflows/sdxl-base_scenario.yaml` |
-| 3 | JuggernautXL + Word | `workflows/sdxl-juggernaut_word.yaml` |
-| 3 | JuggernautXL + Sentence | `workflows/sdxl-juggernaut_sentence.yaml` |
-| 3 | JuggernautXL + Definition | `workflows/sdxl-juggernaut_definition.yaml` |
-| 3 | JuggernautXL + Scenario | `workflows/sdxl-juggernaut_scenario.yaml` |
-| 3 | PixArt + Word | `workflows/pixart-sigma_word.yaml` |
-| 3 | PixArt + Sentence | `workflows/pixart-sigma_sentence.yaml` |
-| 3 | PixArt + Definition | `workflows/pixart-sigma_definition.yaml` |
-| 3 | PixArt + Scenario | `workflows/pixart-sigma_scenario.yaml` |
+| SDXLBase + Word | `workflows/from_predictions/sdxl-base_word.yaml` | TBD |
+| SDXLBase + Sentence | `workflows/from_predictions/sdxl-base_sentence.yaml` | TBD |
+| SDXLBase + Definition | `workflows/from_predictions/sdxl-base_definition.yaml` | TBD |
+| SDXLBase + Scenario | `workflows/from_predictions/sdxl-base_scenario.yaml` | TBD |
+| JuggernautXL + Word | `workflows/from_predictions/sdxl-juggernaut_word.yaml` | TBD |
+| JuggernautXL + Sentence | `workflows/from_predictions/sdxl-juggernaut_sentence.yaml` | TBD |
+| JuggernautXL + Definition | `workflows/from_predictions/sdxl-juggernaut_definition.yaml` | TBD |
+| JuggernautXL + Scenario | `workflows/from_predictions/sdxl-juggernaut_scenario.yaml` | TBD |
+| PixArt + Word | `workflows/from_predictions/pixart-sigma_word.yaml` | TBD |
+| PixArt + Sentence | `workflows/from_predictions/pixart-sigma_sentence.yaml` | TBD |
+| PixArt + Definition | `workflows/from_predictions/pixart-sigma_definition.yaml` | TBD |
+| PixArt + Scenario | `workflows/from_predictions/pixart-sigma_scenario.yaml` | TBD |
 
 
 Please note that not all results can be reproduced exactly due to external or practical constraints. For example:
 
-- Images retrieved from Bing may vary between runs, as the underlying API does not guarantee consistent results or support a fixed random seed.
-- We cannot share the full preprocessed text corpus used to train the skip-gram model due to its size.
+- **Bing image retrieval is non-deterministic**: Image results may vary across runs, as the Bing API does not support a fixed random seed or guarantee consistent results.
+- **Skip-gram training corpus**: Due to size constraints, we cannot share the full preprocessed text corpus used to train the skip-gram model.
 
-Despite these limitations, the provided workflows closely replicate the original pipeline structure, allowing for a high-level reproduction of our experiments.
+Despite these limitations, the provided workflows replicate the structure and logic of our experiments, making it possible to reproduce the overall behavior and trends reported in the paper.
