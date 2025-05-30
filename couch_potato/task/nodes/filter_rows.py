@@ -4,22 +4,22 @@ from couch_potato.task.utils import load_csv, save_csv
 
 class FilterRows(Node):
     """
-    Filters `file_to_filter` to only include rows where `match_column` matches
-    a value in `filter_column` from `filter_file`. Writes the result to `output_file`.
+    Filters `file_to_filter` to only include rows where a value in `match_column`
+    matches a value from `filter_column` in `filter_file`. Writes the result to `output_file`.
 
-    Args:
-        filter_file (str): Path to the CSV file providing values to match.
-        file_to_filter (str): Path to the CSV file that will be filtered.
-        filter_column (str): Column name in `filter_file` to use for matching.
-        match_column (str): Column name in `file_to_filter` to match against filter values.
-        output_file (str): Path to save the filtered CSV.
+    Parameters:
+        - filter_file (str): CSV file containing values to match.
+        - file_to_filter (str): CSV file to be filtered.
+        - filter_column_idx (int): Index of the column in `filter_file` to extract match values.
+        - match_column_idx (int): Index of the column in `file_to_filter` to check against.
+        - output_file (str): File path to save the filtered rows.
     """
 
     PARAMETERS = {
         "filter_file": str,
         "file_to_filter": str,
-        "filter_column": str,
-        "match_column": str,
+        "filter_column": int,
+        "match_column": int,
         "output_file": str,
     }
 
@@ -27,8 +27,8 @@ class FilterRows(Node):
         self,
         filter_file: str,
         file_to_filter: str,
-        filter_column: str,
-        match_column: str,
+        filter_column: int,
+        match_column: int,
         output_file: str,
     ):
         self.filter_file = filter_file
@@ -38,16 +38,21 @@ class FilterRows(Node):
         self.output_file = output_file
 
     def run(self):
-        # Load data
         filter_data = load_csv(self.filter_file)
         data_to_filter = load_csv(self.file_to_filter)
 
-        # Extract set of allowed values from the filter column
-        allowed_values = set(row[self.filter_column] for row in filter_data)
+        # Get headers and the relevant column names from indices
+        filter_header = list(filter_data[0].keys())
+        filter_column = filter_header[self.filter_column]
 
-        # Filter rows where match_column matches one of the allowed values
+        filter_values = set(row[filter_column] for row in filter_data)
+
+        filter_target_header = list(data_to_filter[0].keys())
+        match_column = filter_target_header[self.match_column]
+
+        # Apply filtering based on extracted values
         filtered_data = [
-            row for row in data_to_filter if row[self.match_column] in allowed_values
+            row for row in data_to_filter if row[match_column] in filter_values
         ]
 
         # Save result
