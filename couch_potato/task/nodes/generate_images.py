@@ -11,6 +11,24 @@ from tqdm import tqdm
 
 
 class GenerateImages(Node):
+    """
+    Node for generating images from noun compounds and their constituents.
+
+    This node takes a dictionary or path to target compounds, a directory of text prompts,
+    and a choice of text-to-image model. It generates multiple images per word using the model
+    and saves them to an output directory.
+
+    Parameters:
+        - targets (dict or str): Dictionary mapping compound nouns to their constituents or path to YAML targets file.
+        - prompts_dir (str): Directory containing prompt files for image generation; if empty or None, uses the word itself as prompt.
+        - model_name (str): Identifier for the text-to-image model to use ('sdxl-base', 'sdxl-juggernaut' or 'pixart-sigma').
+        - num_images (int): Number of images to generate per word.
+        - steps (int): Number of inference steps for the diffusion model.
+        - cfg (float): Classifier-free guidance scale controlling prompt adherence.
+        - seed: (int): Base random seed for reproducibility; incremented per image.
+        - cuda_id (int): CUDA device ID where the model will be loaded.
+        - output_dir (str): Directory where generated images will be saved.
+    """
 
     PARAMETERS = {
         "targets": dict | str,
