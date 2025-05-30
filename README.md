@@ -16,7 +16,7 @@ Below is an overview of the data in this repository.
 
 | **Category**               | **File/Directory**                               | **Description**                                                                |
 |---------------------------|--------------------------------------------------|---------------------------------------------------------------------------------|
-| **Targets**               | `data/targets.yaml`                              | List of 88 compound (and constituents) nouns used in the experiments.           |
+| **Targets**               | `data/targets.yaml`                              | List of 88 compound nouns (and constituents) used in the experiments.           |
 |                           | `data/gold.csv`                                  | Human-annotated compositionality ratings from [Reddy et al.](https://aclanthology.org/I11-1024/)|
 | **Prompts**               | `data/prompts/sentence/`                         | **Sentence** prompts from the ENCOW16AX corpus.                                 |
 |                           | `data/prompts/definition/`                       | **Definition** prompts generated via ChatGPT.                                   |
