@@ -14,32 +14,15 @@ This repository contains the code and data used for the ACL 2025 paper: "*A Couc
 
 Below is an overview of the data in this repository.
 
-### Targets
-
-We use 88 out of the 90 compound nouns, along with their corresponding gold-standard compositionality ratings, originally provided by [Reddy et al.](https://aclanthology.org/I11-1024/). These are stored in:
-
-- `data/targets.yaml`: The 88 target compounds.
-- `data/gold.csv`: Human compositionality ratings.
-
-Please refer to the original paper for more details.
-
-### Prompts
-
-Prompts used in our image generation experiments are located under the `data/prompts` directory:
-
-- `sentence/`: Prompts extracted from the ENCOW16AX corpus.
-- `definition/`: Definitions generated using ChatGPT.
-- `scenario/`: Scenario-based descriptions generated using ChatGPT.
-
-Details on the prompt construction process can be found in our paper.
-
-### Predictions
-
-We provide the full predictions for all results presented in the paper, so people that are interested can have a deeper look and also quickly work with the data if they want.
-
-### Concreteness Annotations
-
-The file `data/concreteness/annotations.csv` includes human-annotated concreteness ratings for the 88 compound nouns used in our experiments.
+| **Category**               | **File/Directory**                               | **Description**                                                                |
+|---------------------------|--------------------------------------------------|---------------------------------------------------------------------------------|
+| **Targets**               | `data/targets.yaml`                              | List of 88 compound (and constituents) nouns used in the experiments.           |
+|                           | `data/gold.csv`                                  | Human-annotated compositionality ratings from [Reddy et al.](https://aclanthology.org/I11-1024/)|
+| **Prompts**               | `data/prompts/sentence/`                         | **Sentence** prompts from the ENCOW16AX corpus.                                 |
+|                           | `data/prompts/definition/`                       | **Definition** prompts generated via ChatGPT.                                   |
+|                           | `data/prompts/scenario/`                         | **Scenario** prompts generated via ChatGPT.                                     |
+| **Predictions**           | `data/predictions/`                              | Full set of predictions for all experiments.                                    |
+| **Concreteness Ratings**  | `data/concreteness/annotations.csv`              | Human-annotated concreteness scores for the 88 compounds.                       |
 
 ## Installation
 
