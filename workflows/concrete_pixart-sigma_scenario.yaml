@@ -1,0 +1,42 @@
+nodes:
+- name: sorter
+  parameters:
+    input_file: data/concreteness/annotations.csv
+    output_file: ${this}/sorted.csv
+    ascending: False
+    column: mean
+
+- name: top_k_selector
+  parameters:
+    input_file: ${prev}/sorted.csv
+    output_file: ${this}/top_30.csv
+    top_k: 30
+
+- name: row_filter
+  parameters:
+    filter_file: ${node:2}/top_30.csv
+    filter_column: word
+    file_to_filter: data/predictions/pixart-sigma_scenario.csv
+    match_column: compound
+    output_file: ${this}/predictions.csv
+
+- name: row_filter
+  parameters:
+    filter_file: ${node:2}/top_30.csv
+    filter_column: word
+    file_to_filter: data/gold.csv
+    match_column: "#word"
+    output_file: ${this}/gold.csv
+
+- name: correlation_calculator
+  parameters:
+    input_file_0: ${node:3}/predictions.csv
+    input_file_1: ${node:4}/gold.csv
+    columns_0:
+    - 1
+    - 2
+    columns_1:
+    - 1
+    - 3
+    output_dir: ${this}
+    measure: spearman
