@@ -10,7 +10,7 @@ if __name__ == "__main__":
         description="Run the specified workflow YAML file."
     )
     argparser.add_argument(
-        "-f", "--file", required=True, help="Path to workflow YAML file."
+        "-w", "--workflow", required=True, help="Path to workflow YAML."
     )
     argparser.add_argument(
         "-o", "--output_dir", required=True, help="Directory to store outputs and logs."
