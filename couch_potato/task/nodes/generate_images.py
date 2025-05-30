@@ -10,42 +10,44 @@ from PIL.Image import Image
 from tqdm import tqdm
 
 
-class ImageGenerator(Node):
+class GenerateImages(Node):
 
     PARAMETERS = {
-        "output_dir": str,
         "targets": dict | str,
         "prompts_dir": str,
-        "seed": int,
-        "cuda_id": int,
-        "num_images": int,
         "model_name": str,
+        "num_images": int,
         "steps": int,
         "cfg": float,
+        "seed": int,
+        "cuda_id": int,
+        "output_dir": str,
     }
 
     def __init__(
         self,
-        output_dir: str,
         targets: dict | str,
         prompts_dir: str,
-        seed: int,
-        cuda_id: int,
-        num_images: int,
         model_name: str,
+        num_images: int,
         steps: int,
         cfg: float,
+        seed: int,
+        cuda_id: int,
+        output_dir: str,
     ) -> None:
-        self.output_dir = Path(output_dir)
         self.targets = targets if isinstance(targets, dict) else load_targets(targets)
         self.prompts_dir = (
             None if prompts_dir in ("", "empty", None) else Path(prompts_dir)
         )
-        self.seed = seed
+
+        self.model: TextToImageModel = create_model(model_name, cuda_id)
         self.num_images = num_images
         self.steps = steps
         self.cfg = cfg
-        self.model: TextToImageModel = create_model(model_name, cuda_id)
+        self.seed = seed
+
+        self.output_dir = Path(output_dir)
 
     def run(self) -> None:
         for compound, constituents in tqdm(

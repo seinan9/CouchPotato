@@ -1,7 +1,5 @@
 import logging
 import re
-from pathlib import Path
-from typing import Any
 
 import yaml
 
@@ -85,9 +83,7 @@ def combine_parameters(global_parameters: dict, node_parameters: dict) -> dict:
     return combined_parameters
 
 
-def resolve_placeholders(
-    params: dict[str, Any], current_index: int, node_dirs: dict[int, Path]
-) -> dict[str, Any]:
+def resolve_placeholders(params: dict, current_index: int, node_dirs: dict) -> dict:
     """
     Recursively resolve placeholder strings in parameters.
 

@@ -11,6 +11,7 @@ from huggingface_hub import hf_hub_download
 from transformers import BertModel, BertTokenizer
 
 
+# TODO
 class TextFeatureExtractor(Node):
 
     PARAMETERS = {

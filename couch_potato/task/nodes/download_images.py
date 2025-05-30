@@ -6,7 +6,7 @@ from couch_potato.task.utils import list_files, load_targets, move_file
 from tqdm import tqdm
 
 
-class ImageDownloader(Node):
+class DownloadImages(Node):
     """
     Node to download images from Bing for a set of target words.
 
@@ -14,17 +14,22 @@ class ImageDownloader(Node):
     organizing them by compound in the output directory.
 
     Parameters:
-        - output_dir: Directory where images are saved
         - targets: Dictionary (compound -> [constituents] or a YAML file path
         - num_images: Number of images to download per word
+        - output_dir: Directory where images are saved
     """
 
-    PARAMETERS = {"output_dir": str, "targets": dict | str, "num_images": int}
+    PARAMETERS = {"targets": dict | str, "num_images": int, "output_dir": str}
 
-    def __init__(self, output_dir: str, targets: dict | str, num_images: int) -> None:
-        self.output_dir = Path(output_dir)
+    def __init__(
+        self,
+        targets: dict | str,
+        num_images: int,
+        output_dir: str,
+    ) -> None:
         self.targets = targets if isinstance(targets, dict) else load_targets(targets)
         self.num_images = num_images
+        self.output_dir = Path(output_dir)
 
     def run(self) -> None:
         tmp_dir = self.output_dir / "tmp"  # Temporary directory for raw downloads

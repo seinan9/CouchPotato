@@ -9,7 +9,7 @@ from PIL.Image import Image
 from tqdm import tqdm
 
 
-class ImageFeatureExtractor(Node):
+class ExtractImageFeatures(Node):
     """
     Node to extract feature vectors from images using a specified deep vision model.
 
@@ -18,32 +18,32 @@ class ImageFeatureExtractor(Node):
 
     Parameters:
         - input_dir: Directory containing folders named after compounds, with images inside.
-        - output_dir: Directory where extracted vectors will be saved.
         - targets: Dictionary or YAML path mapping compounds to their constituents.
-        - cuda_id: GPU device ID to use for inference.
         - model_name: String identifier for the image model to use (e.g., "vit").
+        - cuda_id: GPU device ID to use for inference.
+        - output_dir: Directory where extracted vectors will be saved.
     """
 
     PARAMETERS = {
         "input_dir": str,
-        "output_dir": str,
         "targets": dict,
-        "cuda_id": int,
         "model_name": str,
+        "cuda_id": int,
+        "output_dir": str,
     }
 
     def __init__(
         self,
         input_dir: str,
-        output_dir: str,
+        model_name: str,
         targets: dict | str,
         cuda_id: int,
-        model_name: str,
+        output_dir: str,
     ) -> None:
         self.input_dir = Path(input_dir)
-        self.output_dir = Path(output_dir)
         self.targets = targets if isinstance(targets, dict) else load_targets(targets)
         self.model = create_model(model_name, cuda_id)
+        self.output_dir = Path(output_dir)
 
     def run(self) -> None:
         # Iterate over each compound and extract features from the images in its subdirectory (this contains images for the compound and the constituents)

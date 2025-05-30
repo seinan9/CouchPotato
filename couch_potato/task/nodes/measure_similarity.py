@@ -5,39 +5,43 @@ from couch_potato.core.node import Node
 from couch_potato.task.utils import load_targets, load_vector, save_csv
 
 
-class SimilarityMeasurer(Node):
+class MeasureSimilarity(Node):
     """
     Node to compute similarity scores between compound images and their constituents.
 
     Parameters:
         - input_dir: Directory containing vector files (.pt) for each compound and constituent.
-        - output_dir: Directory where the similarity results will be saved.
         - targets: Dictionary or YAML file mapping compounds to two constituents.
         - measure: Name of the similarity function to use (e.g. 'cosine').
         - dim: Dimension over which to compute the similarity.
+        - output_dir: Directory where the similarity results will be saved.
+        - output_name: Name of the file containing the similarities.
     """
 
     PARAMETERS = {
         "input_dir": str,
-        "output_dir": str,
         "targets": str,
         "measure": str,
         "dim": int,
+        "output_dir": str,
+        "output_name": str,
     }
 
     def __init__(
         self,
         input_dir: str,
-        output_dir: str,
         targets: dict | str,
         measure: str,
         dim: int,
+        output_dir: str,
+        output_name: str,
     ):
         self.input_dir = Path(input_dir)
-        self.output_dir = Path(output_dir)
         self.targets = targets if isinstance(targets, dict) else load_targets(targets)
         self.measure = getattr(self, measure)
         self.dim = dim
+        self.output_dir = output_dir
+        self.output_name = output_name
 
     def run(self):
         for compound, constituents in self.targets.items():
@@ -54,15 +58,15 @@ class SimilarityMeasurer(Node):
                 )
 
             compound_output_dir = self.output_dir / compound
-            compound_output_file = compound_output_dir / "similarities.csv"
+            compound_output_file = compound_output_dir / self.output_name
             compound_output_dir.mkdir(parents=True)
 
-            csv_header = ["compound", "sim_const_1", "sim_const_2"]
+            csv_header = ["compound", "sim_1", "sim_2"]
             csv_values = [
                 {
                     "compound": compound,
-                    "sim_const_1": similarities[constituents[0]],
-                    "sim_const_2": similarities[constituents[1]],
+                    "sim_1": similarities[constituents[0]],
+                    "sim_2": similarities[constituents[1]],
                 }
             ]
             save_csv(csv_header, csv_values, compound_output_file)

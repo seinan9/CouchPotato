@@ -2,23 +2,23 @@ from couch_potato.core.node import Node
 from couch_potato.task.utils import load_csv, save_csv
 
 
-class RowFilter(Node):
+class FilterRows(Node):
     """
     Filters `file_to_filter` to only include rows where `match_column` matches
     a value in `filter_column` from `filter_file`. Writes the result to `output_file`.
 
     Args:
         filter_file (str): Path to the CSV file providing values to match.
-        filter_column (str): Column name in `filter_file` to use for matching.
         file_to_filter (str): Path to the CSV file that will be filtered.
+        filter_column (str): Column name in `filter_file` to use for matching.
         match_column (str): Column name in `file_to_filter` to match against filter values.
         output_file (str): Path to save the filtered CSV.
     """
 
     PARAMETERS = {
         "filter_file": str,
-        "filter_column": str,
         "file_to_filter": str,
+        "filter_column": str,
         "match_column": str,
         "output_file": str,
     }
@@ -26,14 +26,14 @@ class RowFilter(Node):
     def __init__(
         self,
         filter_file: str,
-        filter_column: str,
         file_to_filter: str,
+        filter_column: str,
         match_column: str,
         output_file: str,
     ):
         self.filter_file = filter_file
-        self.filter_column = filter_column
         self.file_to_filter = file_to_filter
+        self.filter_column = filter_column
         self.match_column = match_column
         self.output_file = output_file
 

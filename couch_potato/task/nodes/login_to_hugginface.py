@@ -4,7 +4,7 @@ from couch_potato.core.node import Node
 from huggingface_hub import login
 
 
-class HfLogin(Node):
+class LoginToHuggingface(Node):
     """
     Node to authenticate with Hugging Face Hub.
 

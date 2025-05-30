@@ -6,39 +6,39 @@ from PIL import Image
 from tqdm import tqdm
 
 
-class ImagePreprocessor(Node):
+class PreprocessImages(Node):
     """
     Node for preprocessing images by resizing and cropping.
 
     Parameters:
         - input_dir: Directory with original images.
-        - output_dir: Directory to store preprocessed images.
         - targets: Dictionary or YAML path mapping compounds to their constituents.
         - width: Desired width after cropping.
         - height: Desired height after cropping.
+        - output_dir: Directory to store preprocessed images.
     """
 
     PARAMETERS = {
         "input_dir": str,
-        "output_dir": str,
         "targets": dict | str,
         "width": int,
         "height": int,
+        "output_dir": str,
     }
 
     def __init__(
         self,
         input_dir: str,
-        output_dir: str,
         targets: dict | str,
         width: int,
         height: int,
+        output_dir: str,
     ) -> None:
         self.input_dir = Path(input_dir)
-        self.output_dir = Path(output_dir)
         self.targets = targets if isinstance(targets, dict) else load_targets(targets)
         self.width = width
         self.height = height
+        self.output_dir = Path(output_dir)
 
     def run(self) -> None:
         # Loop over each compound and process its images
@@ -50,7 +50,9 @@ class ImagePreprocessor(Node):
 
             for file_name in file_names:
                 file_input_path = compound_input_dir / file_name
-                file_output_path = compound_output_dir / f"{file_name.split(".")[0]}.png"
+                file_output_path = (
+                    compound_output_dir / f"{file_name.split('.')[0]}.png"
+                )
 
                 image = load_image(file_input_path)
                 image = image.convert("RGB")
