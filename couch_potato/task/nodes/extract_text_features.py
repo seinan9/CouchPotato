@@ -12,28 +12,27 @@ from transformers import BertModel, BertTokenizer
 
 
 # TODO
-class TextFeatureExtractor(Node):
+# Currently not functional
+class ExtractTextFeatures(Node):
 
     PARAMETERS = {
-        "output_dir": str,
         "targets": dict | str,
         "separator": str,
-        "model_id": str,
-        "model_path": str,
+        "model_name": str,
+        "output_dir": str,
     }
 
     def __init__(
         self,
-        output_dir: str,
         targets: dict | str,
         separator: str,
-        model_id: str,
-        model_path: str = None,
+        model_name: str,
+        output_dir: str,
     ) -> None:
-        self.output_dir = Path(output_dir)
         self.targets = targets if isinstance(targets, dict) else load_targets(targets)
         self.separator = "" if separator is None else separator
-        self.model: TextToVectorModel = globals()[model_id](model_path)
+        self.model = create_model(model_name)
+        self.output_dir = Path(output_dir)
 
     def run(self) -> None:
         for compound, constituents in self.targets.items():
@@ -61,7 +60,7 @@ class TextToVectorModel(ABC):
 
 class FastText(TextToVectorModel):
 
-    def __init__(self, model_path) -> None:
+    def __init__(self) -> None:
         # monkey patch to supress warning
         fasttext.FastText.eprint = lambda x: None
 
@@ -74,9 +73,10 @@ class FastText(TextToVectorModel):
         return torch.from_numpy(self.model[word])
 
 
-class Word2Vec(TextToVectorModel):
+class SkipGram(TextToVectorModel):
 
-    def __init__(self, model_path) -> None:
+    def __init__(self) -> None:
+        model_path = "TODO"
         self.model = w2v.load(model_path)
 
     def extract_vector(self, word: str) -> torch.Tensor:
@@ -85,7 +85,7 @@ class Word2Vec(TextToVectorModel):
 
 class Spacy(TextToVectorModel):
 
-    def __init__(self, model_path) -> None:
+    def __init__(self) -> None:
         self.model = spacy.load("en_core_web_lg")
 
     def extract_vector(self, word: str) -> torch.Tensor:
@@ -94,7 +94,7 @@ class Spacy(TextToVectorModel):
 
 class Bert(TextToVectorModel):
 
-    def __init__(self, model_path) -> None:
+    def __init__(self) -> None:
         name = "bert-base-uncased"
         self.tokenizer = BertTokenizer.from_pretrained(name)
         self.model = BertModel.from_pretrained(name)
@@ -111,3 +111,16 @@ class Bert(TextToVectorModel):
             vector = last_hidden_state.squeeze(0)[0]
 
         return vector
+
+
+def create_model(model_name: str) -> TextToVectorModel:
+    if model_name == "fasttext":
+        return FastText()
+    elif model_name == "skip-gram"
+        return SkipGram()
+    elif model_name == "spacy":
+        return Spacy()
+    elif model_name == "Bert":
+        return Bert() 
+    else:
+        raise ValueError(f"Unknown model name: {model_name}")
