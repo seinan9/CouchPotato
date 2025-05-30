@@ -6,9 +6,7 @@ This repository contains the code and data used for the ACL 2025 paper: "*A Couc
 
 - [Data](#data)
 - [Installation](#installation)
-- [Usage](#usage)
 - [Reproducing Results from the Paper](#reproducing-results-from-the-paper)
-- [License](#license)
 
 ## Data
 
@@ -33,13 +31,13 @@ Prompts used in our image generation experiments are located under the `data/pro
 
 Details on the prompt construction process can be found in our paper.
 
-### ChatGPT Predictions
+### Predictions
 
-The file `data/chatgpt_predictions.yaml` contains ChatGPT-generated compositionality predictions for each of the 88 target compounds.
+We provide the full predictions for all results presented in the paper, so people that are interested can have a deeper look and also quickly work with the data if they want.
 
 ### Concreteness Annotations
 
-The file `data/concreteness_annotations.csv` includes human-annotated concreteness ratings for the 88 compound nouns used in our experiments.
+The file `data/concreteness/annotations.csv` includes human-annotated concreteness ratings for the 88 compound nouns used in our experiments.
 
 ## Installation
 
@@ -61,113 +59,64 @@ The file `data/concreteness_annotations.csv` includes human-annotated concretene
 
         export HF_TOKEN=your_token_here
 
-## Usage
-
-CouchPotato uses a modular **workflow system** based on YAML files. Each workflow defines a series of **nodes** (self-contained components) that are executed sequentially.
-
-### How it Works
-
-At the core is the `engine`, which loads a workflow, resolves variables, and runs each node step by step. Each **node** performs a single task (e.g., generating images, extracting features, computing correlations). You define nodes and their parameters in a YAML file, and then run the workflow via:
-
-```bash
-python couch_potato/main.py --workflow workflows/example.yaml --output_dir output/example
-```
-
-This command:
-
-- Loads the workflow from workflows/example.yaml
-- Creates the output structure under output/example
-- Copies the workflow YAML into the output directory for reproducibility
-- Runs (and logs) all nodes in the specified order
-- Stores any artifacts in designated subdirectories
-
-### Using Existing Nodes
-
-The *couch_potato/task/nodes* directory contains all nodes used for the experiments in our paper. Each node is a Python class that inherits from Node (*couch_potato/core/node.py) and defines:
-
-- A PARAMETERS dictionary specifying required inputs
-- An __init__() method that handles these inputs
-- A run() method that implements the nodes behavior
-
-### Creating a Workflow
-
-A workflow is a YAML file consisting of:
-
-- Optional *global_parameters* shared across nodes
-- A list of nodes with name and parameters
-
-Each node corresponds to a Python module in task/nodes/, and its class name is derived from the module name.
-
-Example:
-
-TODO
-
-The name must match the module in task.nodes, and the parameters must match the class’s PARAMETERS.
-
-### YAML Variables
-
-To simplify file path and directory references, you can use the following YAML variables:
-
-|Variable|Description|
-|---|---|
-|`${this}`|The output directory of the current node|
-|`${prev}`|The output directory of the previous node|
-|`${node:<index>}`|The output directory of the specified node (e.g. `${node:3}`)|
-
-These variables are automatically resolved by the engine.
-
-Example:
-
-### Creating New Nodes
-
-To add a new node:
-1. Create a new Python file in couch_potato/task/nodes/, e.g. my_node.py
-2. Inherit from Node and define the required parameters and behavior:
-
-TODO: Example
-
-3. Reference it in a workflow:
-
-TODO: Example
-
-### Example Node and Workflow
-
-Here is a minimal example node that just prints a message:
-
-```python
-from couch_potato.core.node import Node
-
-class ExampleNode(Node):
-    PARAMETERS = {"message": str}
-
-    def __init__(self, message: str) -> None:
-        self.message = message
-
-    def run(self):
-        print(self.message)
-```
-
-and here a workflow making use of it:
-
-```yaml
-nodes:
-- name: example_node
-  parameters:
-    message: "Hello World!"
-```
-
-Use the following command to run the workflow:
-
-        python couch_potato/main.py --workflow workflows/example.yaml --output_dir output/example
-
-You should see:
-
-        "Hello World!"
-
 ## Reproducing Results from the Paper
 
+For easy reproducibility we provide YAML workflows. In order to reproduce a result, select the corresponding workflow YAML file and pass it to the main module.
+```bash
+python3 couch_potato/main.py -w workflows/example_workflow.yaml -o path/to/desired/output_dir
+```
 
-We provide workflow YAML files to reproduce most of the results reported in our paper.
+### Example
+To reproduce **PixArt + Scenario** from Table 1:
+```bash
+python couch_potato/main.py --workflow workflows/pixart_scenario.yaml --output_dir output/pixart_scenario
+```
+The modifier and head correlation can then be found under output/pixart_scenario/artifacts/7_correlation_calculator/similarities.csv
+
+We provide two options:
+1. Starting from the predictions: Very fast, in most cases this only correlates the predictions to the gold data.
+2. Starting from Scratch: Very slow, this does all the steps from start to finish (downloading/generating images, feature extraction and so on)
+
+### Table 1
+
+| Table | Results | Workflow File | Workflow File (full) |
+|---|---|---|
+| 1 | Bing | `workflows/bing.yaml`|
+| 1 | PixArt + Word | `workflows/pixart-sigma_word.yaml` |
+| 1 | PixArt + Sentence | `workflows/pixart-sigma_sentence.yaml` |
+| 1 | PixArt + Definition | `workflows/pixart-sigma_definition.yaml` |
+| 1 | PixArt + Scenario | `workflows/pixart-sigma_scenario.yaml` |
+| 1 | Skip-gram (T) | `workflows/skip-gram.yaml` |
+| 1 | Combined (T + V) | `workflows/combined.yaml` |
+| 1 | ChatGPT (direct) | `workflows/chat-gpt.yaml` |
+
+
+### Table 2
+
+| Table | Results | Workflow File |
+|---|---|---|
+| 2 | Concrete: PixArt + Scenario | `workflows/concrete_pixart-sigma_scenario.yaml`|
+| 2 | Abstract: PixArt + Scenario | `workflows/abstract_pixart-sigma_scenario.yaml`|
+| 2 | Concrete: Skip-gram | `workflows/concrete_skip-gram.yaml`|
+| 2 | Abstract: Skip-gram | `workflows/abstract_skip-gram.yaml`|
+
+### Table 3
+
+| Table | Results | Workflow File |
+|---|---|---|
+| 3 | SDXLBase + Word | `workflows/sdxl-base_word.yaml` |
+| 3 | SDXLBase + Sentence | `workflows/sdxl-base_sentence.yaml` |
+| 3 | SDXLBase + Definition | `workflows/sdxl-base_definition.yaml` |
+| 3 | SDXLBase + Scenario | `workflows/sdxl-base_scenario.yaml` |
+| 3 | JuggernautXL + Word | `workflows/sdxl-juggernaut_word.yaml` |
+| 3 | JuggernautXL + Sentence | `workflows/sdxl-juggernaut_sentence.yaml` |
+| 3 | JuggernautXL + Definition | `workflows/sdxl-juggernaut_definition.yaml` |
+| 3 | JuggernautXL + Scenario | `workflows/sdxl-juggernaut_scenario.yaml` |
+| 3 | PixArt + Word | `workflows/pixart-sigma_word.yaml` |
+| 3 | PixArt + Sentence | `workflows/pixart-sigma_sentence.yaml` |
+| 3 | PixArt + Definition | `workflows/pixart-sigma_definition.yaml` |
+| 3 | PixArt + Scenario | `workflows/pixart-sigma_scenario.yaml` |
+
 
 Please note that not all results can be reproduced exactly due to external or practical constraints. For example:
 
@@ -175,34 +124,3 @@ Please note that not all results can be reproduced exactly due to external or pr
 - We cannot share the full preprocessed text corpus used to train the skip-gram model due to its size.
 
 Despite these limitations, the provided workflows closely replicate the original pipeline structure, allowing for a high-level reproduction of our experiments.
-
-### Table 1
-
-Each row in Table 1 of the paper can be reproduced by running the corresponding workflow file with `main.py`. The (final and intermediate) results can be found in the specified output directory under *artifacts*.
-
-| Table 1 Result                | Workflow File                           |
-|-----------------------------|------------------------------------------|
-| Bing Images                 | `workflows/bing.yaml`                    |
-| PixArt - Word Prompts       | `workflows/pixart_word.yaml`            |
-| PixArt - Sentence Prompts   | `workflows/pixart_sentence.yaml`        |
-| PixArt - Definition Prompts | `workflows/pixart_definition.yaml`      |
-| PixArt - Scenario Prompts   | `workflows/pixart_scenario.yaml`        |
-
-#### Example
-
-To reproduce the **PixArt - Scenario Prompts** result:
-
-        python couch_potato/main.py --workflow workflows/pixart_scenario.yaml --output_dir output/pixart_scenario
-
-The modifier and head correlation can then be found under output/pixart_scenario/artifacts/7_correlation_calculator/similarities.csv
-
-### Table 2
-
-### Table 3
-
-### Combining Textual and Visual
-
-### Compounds by Concreteness
-
-## License
-
