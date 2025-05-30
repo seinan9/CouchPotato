@@ -62,7 +62,7 @@ python3 couch_potato/main.py --workflow workflows/from_scratch/pixart-sigma_scen
 ```
 The modifier and head correlation scores will be saved at:
 ```
-output/pixart_scenario/artifacts/7_correlate/similarities.csv
+output/pixart_scenario/artifacts/7_correlate/correlations.csv
 ```
 
 ### Options for Reproduction
