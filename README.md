@@ -9,6 +9,7 @@ This repository contains the code and data used for the ACL 2025 paper: "*A Couc
 - [Data](#data)
 - [Installation](#installation)
 - [Reproducing Results from the Paper](#reproducing-results-from-the-paper)
+- [Requirements](#requirements)
 
 ## Data
 
@@ -118,3 +119,21 @@ Please note that not all results can be reproduced exactly due to external or pr
 - **Skip-gram training corpus**: Due to size constraints, we cannot share the full preprocessed text corpus used to train the skip-gram model.
 
 Despite these limitations, the provided workflows replicate the structure and logic of our experiments, making it possible to reproduce the overall behavior and trends reported in the paper.
+
+## Requirements
+
+```
+bing-image-downloader==1.1.2
+diffusers==0.32.2
+fasttext-wheel==0.9.2
+natsort==8.4.0
+pyaml==24.4.0
+scipy==1.13.0
+spacy==3.7.5
+spacy-legacy==3.0.12
+spacy-loggers==1.0.5
+torch==2.3.0+cu118
+torchvision==0.18.0+cu118
+tqdm==4.66.2
+transformers==4.40.1
+```
