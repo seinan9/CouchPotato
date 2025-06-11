@@ -2,7 +2,7 @@
 
 THIS IS WORK IN PROGRESS!
 
-This repository contains the code and data used for the ACL 2025 paper: "*A Couch Potato is not a Potato on a Couch: Visual Compositionality Prediction using Prompting Strategies and Image Generation for Adequate Image Retrieval*".
+This repository contains the code and data used for the ACL 2025 paper: "*A Couch Potato is not a Potato on a Couch: Prompting Strategies, Image Generation, and Compositionality Prediction for Noun Compounds*".
 
 **Table of Contents**
 
